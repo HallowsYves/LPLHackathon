@@ -1,0 +1,86 @@
+{
+  "client": {
+    "name": "Margaret Hale",
+    "age": 78
+  },
+  "period": "2026-Q3",
+  "accounts": [
+    {
+      "id": "A1",
+      "type": "IRA",
+      "start_value": 412300.12,
+      "end_value": 417540.04
+    },
+    {
+      "id": "A2",
+      "type": "Individual brokerage",
+      "start_value": 126450.25,
+      "end_value": 126904.03
+    }
+  ],
+  "fees": [
+    {
+      "label": "Advisory fee",
+      "amount": 655.0,
+      "account": "A1"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "t1",
+      "date": "2026-07-05",
+      "type": "withdrawal",
+      "payee": "Riverbend Credit Union (Hale checking)",
+      "amount": 800.0,
+      "account": "A2",
+      "payee_is_new": false
+    },
+    {
+      "id": "t2",
+      "date": "2026-07-15",
+      "type": "dividend",
+      "amount": 1284.6,
+      "account": "A1"
+    },
+    {
+      "id": "t3",
+      "date": "2026-08-05",
+      "type": "withdrawal",
+      "payee": "Riverbend Credit Union (Hale checking)",
+      "amount": 800.0,
+      "account": "A2",
+      "payee_is_new": false
+    },
+    {
+      "id": "t4",
+      "date": "2026-08-20",
+      "type": "deposit",
+      "amount": 1500.0,
+      "account": "A2"
+    },
+    {
+      "id": "t5",
+      "date": "2026-08-28",
+      "type": "dividend",
+      "amount": 342.18,
+      "account": "A2"
+    },
+    {
+      "id": "t6",
+      "date": "2026-09-05",
+      "type": "withdrawal",
+      "payee": "Riverbend Credit Union (Hale checking)",
+      "amount": 800.0,
+      "account": "A2",
+      "payee_is_new": false
+    },
+    {
+      "id": "t7",
+      "date": "2026-09-15",
+      "type": "dividend",
+      "amount": 1311.92,
+      "account": "A1"
+    }
+  ],
+  "prior_fee_total": 640.0
+}
