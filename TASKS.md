@@ -94,7 +94,7 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 ## Track INFRA
 
-- [ ] **P. SAM template** | Needs: M, N (entry points exist), H | Owns: `infra/template.yaml`
+- [x] **P. SAM template** | Needs: M, N (entry points exist), H | Owns: `infra/template.yaml`
   Prompt: Write a SAM template: API Gateway REST API with the six routes pointing at one Python 3.12 Lambda, DynamoDB tables `cs_flags` and `cs_audit` (on-demand billing), an S3 bucket for audio and one for the static site, least-privilege IAM (Bedrock invoke, Polly, Textract, the two tables, the audio bucket), env vars from the shared shapes, and CORS for the site origin.
   Done when: `sam validate` and `sam build` succeed.
 - [ ] **Q. Deploy script** | Needs: P | Owns: `infra/deploy.sh`

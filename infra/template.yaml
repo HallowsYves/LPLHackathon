@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Clear Statement - sample-data demo (tested on sample data)
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: us.anthropic.claude-haiku-4-5-20251001-v1:0
+  GuardrailId:
+    Type: String
+    Default: 4sd551z8rcpq
+    Description: From infra/create_guardrail.py
+  GuardrailVersion:
+    Type: String
+    Default: '1'
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 60
+    MemorySize: 512
+
+Resources:
+  FlagsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cs_flags
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: id, AttributeType: S}]
+      KeySchema: [{AttributeName: id, KeyType: HASH}]
+
+  AuditTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cs_audit
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: id, AttributeType: S}]
+      KeySchema: [{AttributeName: id, KeyType: HASH}]
+
+  AudioBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [GET]
+            AllowedOrigins: ['*']
+            AllowedHeaders: ['*']
+
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub '${SiteBucket.Arn}/*'
+
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      # Synthetic data only, so any origin may call the demo API. Lock this to the
+      # site origin before using anything real.
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type'"
+        AllowMethods: "'GET,POST,OPTIONS'"
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: ../
+      Handler: backend.api.handler.handler
+      Environment:
+        Variables:
+          STORE: dynamo
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          GUARDRAIL_ID: !Ref GuardrailId
+          GUARDRAIL_VERSION: !Ref GuardrailVersion
+          AUDIO_BUCKET: !Ref AudioBucket
+      Policies:
+        - DynamoDBCrudPolicy: {TableName: !Ref FlagsTable}
+        - DynamoDBCrudPolicy: {TableName: !Ref AuditTable}
+        - S3CrudPolicy: {BucketName: !Ref AudioBucket}
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource:
+                - arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5-*
+                - !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.anthropic.claude-haiku-4-5-*
+            - Effect: Allow
+              Action: bedrock:ApplyGuardrail
+              Resource: !Sub arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/${GuardrailId}
+            - Effect: Allow
+              Action: polly:SynthesizeSpeech
+              Resource: '*'
+            - Effect: Allow
+              Action: textract:AnalyzeDocument
+              Resource: '*'
+      Events:
+        Process: {Type: Api, Properties: {RestApiId: !Ref Api, Path: /process, Method: POST}}
+        Statement: {Type: Api, Properties: {RestApiId: !Ref Api, Path: '/statement/{id}', Method: GET}}
+        Summary: {Type: Api, Properties: {RestApiId: !Ref Api, Path: '/summary/{id}', Method: GET}}
+        Flags: {Type: Api, Properties: {RestApiId: !Ref Api, Path: /flags, Method: GET}}
+        Decision: {Type: Api, Properties: {RestApiId: !Ref Api, Path: '/flags/{id}/decision', Method: POST}}
+        Audit: {Type: Api, Properties: {RestApiId: !Ref Api, Path: '/audit/{id}', Method: GET}}
+
+Outputs:
+  ApiUrl:
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  SiteBucketName:
+    Value: !Ref SiteBucket
+  SiteUrl:
+    Value: !GetAtt SiteBucket.WebsiteURL
+  AudioBucketName:
+    Value: !Ref AudioBucket
