@@ -55,7 +55,7 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 - [x] **F. Flag rules** | Needs: none | Owns: `backend/flags/rules.py`, `backend/flags/test_rules.py`
   Prompt: Implement three plain-Python functions taking a `statement.json` dict and returning a list of flag dicts (shape in `CLAUDE.md`, ids assigned by the caller): `large_wire_new_payee`, `rapid_withdrawals`, `fee_jump`. Use the threshold constants from the shared shapes. Each flag carries a plain-English `reason` that says "worth a call" and never says fraud. Include `txn_ids`. For `fee_jump`, `txn_ids` is empty. Write tests with inline fixtures (a clean one and a planted one) so you do not wait on task C.
   Done when: `python -m unittest backend.flags.test_rules` passes.
-- [ ] **G. Flag runner** | Needs: F, H | Owns: `backend/flags/run.py`
+- [x] **G. Flag runner** | Needs: F, H | Owns: `backend/flags/run.py`
   Prompt: Write `run_flags(statement_id)` that loads `data/ground_truth/<id>.json`, runs all rules, assigns ids (`f1`, `f2`, ...), adds `statement_id`, `created_at` and `status: "open"`, and saves via `backend/common/store.py`. It is idempotent: re-running replaces that statement's flags without duplicating.
   Done when: running it for `problem` yields exactly 3 open flags and for `clean` yields 0.
 
