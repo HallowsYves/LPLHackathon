@@ -136,6 +136,12 @@ Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high con
   Prompt: Research task first: run the research prompt (ask the team lead) and save sources to `docs/sources.md`. Then draft the deck (LPL template) around the pitch in `CLAUDE.md`: problem, demo, architecture slide with why each AWS service was chosen, business-impact slide using only sourced figures, roadmap (audit trail as training data for tuned thresholds, Step Functions, SES). Prepare the code ZIP (no secrets, no `.local_store/`) and the Project Submission Form. Submit with at least a 1-hour buffer before 9:00 AM PT Saturday Oct 3.
   Done when: deck, ZIP and form are ready and uploaded to Box.
 
+## Stretch (only after X works end to end)
+
+- [ ] **AA. Spanish read-aloud** | Needs: J, L, T (and M for the API param) | Owns: `backend/summary/translate.py`; small edits allowed in `summarize.py`, `speak.py`, `handler.py`, `client.js` (coordinate with their owners)
+  Prompt: Add Spanish (`es`) alongside English (`en`) only; no other languages. Write `translate_summary(text, lang)` using Amazon Translate on the already-validated English summary, then re-run the number validator on the result and fall back to the English text with a visible notice if figures do not match. `speak.py` maps `en` to a neural English voice and `es` to a neural Spanish (US) voice, and the S3 cache key includes the language. `GET /summary/{id}?lang=es` returns the translated text, `audio_url` and the `validation` block. The frontend gets an English/Español dropdown beside Read aloud, and shows "Machine translated" on screen for Spanish. Guardrails and the "worth a call" tone apply to the English source before translation.
+  Done when: selecting Español shows Spanish text and plays Spanish audio on `problem`, and the validation badge shows 0 mismatches.
+
 ## Suggested order for two people
 
 - Person 1 (backend): A, H, F, G, I, J, N, M, L, K, O, P, Q, R
