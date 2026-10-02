@@ -33,7 +33,7 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 ## Track 0: Setup
 
-- [ ] **A. AWS login and smoke test** | Needs: none | Owns: `infra/smoke_test.py`
+- [x] **A. AWS login and smoke test** | Needs: none | Owns: `infra/smoke_test.py`
   Prompt: Follow `SETUP.md` to get AWS CLI credentials working, then write `infra/smoke_test.py` that makes one call each to Bedrock (using `BEDROCK_MODEL_ID`), Polly, Textract (`AnalyzeDocument` on a tiny generated image or any bytes the API accepts) and S3 (`list_buckets`), prints PASS/FAIL per service and the region used.
   Done when: `python infra/smoke_test.py` prints PASS for all four, or a clear FAIL reason for each blocked one.
 - [x] **B. Scaffold** | Done: folders, `CLAUDE.md`, `AGENTS.md`, this file.
