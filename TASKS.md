@@ -67,10 +67,10 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 ## Track SUMMARY
 
-- [ ] **I. Number validator** | Needs: none | Owns: `backend/summary/validator.py`, `backend/summary/test_validator.py`
+- [x] **I. Number validator** | Needs: none | Owns: `backend/summary/validator.py`, `backend/summary/test_validator.py`
   Prompt: Write `validate(summary_text, statement) -> {"figures_checked": int, "mismatches": [str]}`. Extract every dollar figure from the text (handle `$1,031.50`, `$48,000`, `$412K` style if you choose to allow it, and say which). A figure is valid if it equals a value in the statement JSON (account values, fees, transaction amounts, `prior_fee_total`) or an allowed derived value (document which: sums and differences of listed values). Tests: a correct summary, one with a wrong figure, and one with an invented figure.
   Done when: `python -m unittest backend.summary.test_validator` passes.
-- [ ] **J. Summarizer** | Needs: I (code), A (for a live Bedrock call; mock otherwise) | Owns: `backend/summary/summarize.py`
+- [x] **J. Summarizer** | Needs: I (code), A (for a live Bedrock call; mock otherwise) | Owns: `backend/summary/summarize.py`
   Prompt: Write `summarize(statement) -> summary response` (shape above, without `audio_url`). The Bedrock prompt receives only the statement JSON and asks for a short, large-print-friendly summary: account value, what changed, fees paid, and 2 to 3 questions to ask the advisor. Plain words, no investment advice, no word "fraud". Run `validate`; on mismatch regenerate up to 3 times, passing back the mismatching figures. If all attempts fail, return a deterministic template summary filled from the JSON with `used_fallback: true`. Use the Bedrock Converse API. Add a `--mock` flag that skips Bedrock and returns the template.
   Done when: `python -m backend.summary.summarize problem --mock` prints a valid summary, and without `--mock` it passes validation against Bedrock.
 - [ ] **K. Guardrail** | Needs: A | Owns: `infra/create_guardrail.py`
