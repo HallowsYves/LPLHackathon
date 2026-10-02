@@ -40,7 +40,7 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 ## Track DATA
 
-- [ ] **C. Ground-truth statements** | Needs: none | Owns: `data/ground_truth/`
+- [x] **C. Ground-truth statements** | Needs: none | Owns: `data/ground_truth/`
   Prompt: Write `clean.json` and `problem.json` for Margaret Hale (age 78, 2026-Q3) in the `statement.json` shape. Use realistic, internally consistent numbers. `clean` has normal activity and a prior fee total within 25% of the current fee total. `problem` plants all three issues: a wire of at least $10,000 to a payee with `payee_is_new: true`; three or more withdrawals within 7 days totaling at least $5,000; fees more than 25% above `prior_fee_total` (example: 1031.50 vs 640.00). Use fictional payees only. Include `prior_fee_total` in both.
   Done when: both files parse as JSON and match the shape in `CLAUDE.md` section 5.
 - [ ] **D. Consistency check** | Needs: C | Owns: `data/check_ground_truth.py`
