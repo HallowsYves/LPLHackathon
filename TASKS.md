@@ -73,10 +73,10 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 - [x] **J. Summarizer** | Needs: I (code), A (for a live Bedrock call; mock otherwise) | Owns: `backend/summary/summarize.py`
   Prompt: Write `summarize(statement) -> summary response` (shape above, without `audio_url`). The Bedrock prompt receives only the statement JSON and asks for a short, large-print-friendly summary: account value, what changed, fees paid, and 2 to 3 questions to ask the advisor. Plain words, no investment advice, no word "fraud". Run `validate`; on mismatch regenerate up to 3 times, passing back the mismatching figures. If all attempts fail, return a deterministic template summary filled from the JSON with `used_fallback: true`. Use the Bedrock Converse API. Add a `--mock` flag that skips Bedrock and returns the template.
   Done when: `python -m backend.summary.summarize problem --mock` prints a valid summary, and without `--mock` it passes validation against Bedrock.
-- [ ] **K. Guardrail** | Needs: A | Owns: `infra/create_guardrail.py`
+- [x] **K. Guardrail** | Needs: A | Owns: `infra/create_guardrail.py`
   Prompt: Write a script that creates a Bedrock Guardrail denying topics "fraud accusations" and "investment advice (buy, sell, hold recommendations)" and prints its id and version. Document the env vars `GUARDRAIL_ID` and `GUARDRAIL_VERSION` that `summarize.py` should read and apply when set. Make creation idempotent by name.
   Done when: running it twice does not duplicate the guardrail, and a test prompt asking for investment advice is blocked.
-- [ ] **L. Read-aloud** | Needs: A | Owns: `backend/summary/speak.py`
+- [x] **L. Read-aloud** | Needs: A | Owns: `backend/summary/speak.py`
   Prompt: Write `speak(statement_id, text) -> presigned_url`. It calls Polly (a neural voice with a slower rate via SSML), writes the mp3 to an S3 bucket named by env var `AUDIO_BUCKET` under `audio/<statement_id>.mp3`, and returns a presigned URL valid for one hour. Cache: if the object exists for the same text hash, skip Polly.
   Done when: running it on sample text gives a URL that plays in a browser.
 

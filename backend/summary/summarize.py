@@ -9,7 +9,9 @@ MAX_ATTEMPTS times, telling the model what was wrong. If every attempt fails we
 return a deterministic template filled straight from the JSON (used_fallback true).
 
 Env: AWS_REGION, BEDROCK_MODEL_ID; optional GUARDRAIL_ID and GUARDRAIL_VERSION
-(version defaults to DRAFT) are applied to every Bedrock call when set.
+(version defaults to DRAFT) are applied to the model's output when set. They are
+not applied to the input: the statement JSON itself (IRA, brokerage, wires) trips the
+investment-advice topic, and the point is to police what the model writes.
 
 Usage: python -m backend.summary.summarize problem [--mock]
 """
@@ -85,13 +87,20 @@ def _generate(client, statement, problems):
         "messages": [{"role": "user", "content": [{"text": prompt}]}],
         "inferenceConfig": {"maxTokens": 700, "temperature": 0.2},
     }
-    if os.environ.get("GUARDRAIL_ID"):
-        kwargs["guardrailConfig"] = {"guardrailIdentifier": os.environ["GUARDRAIL_ID"],
-                                     "guardrailVersion": os.environ.get("GUARDRAIL_VERSION", "DRAFT")}
     resp = client.converse(**kwargs)
-    if resp.get("stopReason") == "guardrail_intervened":
+    text = "".join(b.get("text", "") for b in resp["output"]["message"]["content"]).strip()
+    if os.environ.get("GUARDRAIL_ID") and _guardrail_blocks(text):
         return None
-    return "".join(b.get("text", "") for b in resp["output"]["message"]["content"]).strip()
+    return text
+
+
+def _guardrail_blocks(text):
+    import boto3
+    rt = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION"))
+    r = rt.apply_guardrail(guardrailIdentifier=os.environ["GUARDRAIL_ID"],
+                           guardrailVersion=os.environ.get("GUARDRAIL_VERSION", "DRAFT"),
+                           source="OUTPUT", content=[{"text": {"text": text}}])
+    return r["action"] == "GUARDRAIL_INTERVENED"
 
 
 def summarize(statement, mock=False, client=None):
