@@ -46,13 +46,13 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 - [x] **D. Consistency check** | Needs: C | Owns: `data/check_ground_truth.py`
   Prompt: Write a script that loads every `data/ground_truth/*.json` and checks: required keys exist, dates fall in the stated period, transaction ids are unique, fee amounts are positive, and account change from `start_value` to `end_value` is plausible given the listed transactions and fees (document the tolerance). Exit non-zero with a readable message on failure.
   Done when: `python data/check_ground_truth.py` exits 0 on both files, and exits non-zero if you edit one number.
-- [ ] **E. PDF generator** | Needs: C | Owns: `data/make_pdfs.py`, `data/pdfs/`
+- [x] **E. PDF generator** | Needs: C | Owns: `data/make_pdfs.py`, `data/pdfs/`
   Prompt: Using `reportlab`, generate `data/pdfs/<id>.pdf` from each ground-truth JSON. Make it look like a dense brokerage statement: header with client and period, account summary table, fees table, a transactions table, small print. Every figure printed must come from the JSON, never retyped. Label it "SYNTHETIC SAMPLE, NOT A REAL STATEMENT" in the footer.
   Done when: `python data/make_pdfs.py` writes two PDFs that open and show every transaction.
 
 ## Track FLAGS
 
-- [ ] **F. Flag rules** | Needs: none | Owns: `backend/flags/rules.py`, `backend/flags/test_rules.py`
+- [x] **F. Flag rules** | Needs: none | Owns: `backend/flags/rules.py`, `backend/flags/test_rules.py`
   Prompt: Implement three plain-Python functions taking a `statement.json` dict and returning a list of flag dicts (shape in `CLAUDE.md`, ids assigned by the caller): `large_wire_new_payee`, `rapid_withdrawals`, `fee_jump`. Use the threshold constants from the shared shapes. Each flag carries a plain-English `reason` that says "worth a call" and never says fraud. Include `txn_ids`. For `fee_jump`, `txn_ids` is empty. Write tests with inline fixtures (a clean one and a planted one) so you do not wait on task C.
   Done when: `python -m unittest backend.flags.test_rules` passes.
 - [ ] **G. Flag runner** | Needs: F, H | Owns: `backend/flags/run.py`
