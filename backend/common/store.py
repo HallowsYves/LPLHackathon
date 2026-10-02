@@ -144,9 +144,12 @@ def _num_key(f):
 
 def _dyn_save_flags(statement_id, flags):
     table = _table(FLAGS_TABLE)
+    new_ids = {f["id"] for f in flags}
+    # a batch may not hold two writes for one key, so delete only ids that are going away
     with table.batch_writer() as batch:
         for old in _scan(FLAGS_TABLE, statement_id):
-            batch.delete_item(Key={"id": old["id"]})
+            if old["id"] not in new_ids:
+                batch.delete_item(Key={"id": old["id"]})
         for f in flags:
             batch.put_item(Item=f)
     return flags
