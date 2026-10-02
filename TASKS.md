@@ -61,7 +61,7 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 ## Track STORE
 
-- [ ] **H. Store** | Needs: none | Owns: `backend/common/store.py`
+- [x] **H. Store** | Needs: none | Owns: `backend/common/store.py`
   Prompt: Implement functions `save_flags`, `list_flags(statement_id=None)`, `get_flag`, `update_flag_status`, `add_audit`, `list_audit(statement_id)` with the `STORE=local|dynamo` switch from the shared shapes. The DynamoDB backend uses tables `cs_flags` (key `id`) and `cs_audit` (key `id`, plus a `statement_id` index or scan filter; keep it simple). The local backend writes JSON under `.local_store/` (add it to `.gitignore`).
   Done when: a short script round-trips a flag and an audit record on the local backend, and the dynamo backend passes the same script when the tables exist.
 
