@@ -97,10 +97,10 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 - [x] **P. SAM template** | Needs: M, N (entry points exist), H | Owns: `infra/template.yaml`
   Prompt: Write a SAM template: API Gateway REST API with the six routes pointing at one Python 3.12 Lambda, DynamoDB tables `cs_flags` and `cs_audit` (on-demand billing), an S3 bucket for audio and one for the static site, least-privilege IAM (Bedrock invoke, Polly, Textract, the two tables, the audio bucket), env vars from the shared shapes, and CORS for the site origin.
   Done when: `sam validate` and `sam build` succeed.
-- [ ] **Q. Deploy script** | Needs: P | Owns: `infra/deploy.sh`
+- [x] **Q. Deploy script** | Needs: P | Owns: `infra/deploy.sh`
   Prompt: One script that runs `sam deploy`, writes the API URL into `frontend/config.js`, and uploads `frontend/` to the site bucket (CloudFront in front, if time allows; otherwise the simplest hosting the account permits). Print the final site URL.
   Done when: running it from a clean checkout gives a working URL.
-- [ ] **R. Deployed smoke test** | Needs: Q | Owns: `infra/e2e_test.py`
+- [x] **R. Deployed smoke test** | Needs: Q | Owns: `infra/e2e_test.py`
   Prompt: A script that calls the deployed API: process `problem`, expect 3 flags, fetch the summary (audio URL must respond with 200), escalate a flag with a note, and read the audit trail. Run it from a browser-origin-like request to catch CORS issues.
   Done when: it prints PASS on the deployed stack.
 
