@@ -82,13 +82,13 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 ## Track API
 
-- [ ] **N. Decisions and audit** | Needs: H | Owns: `backend/api/decisions.py`
+- [x] **N. Decisions and audit** | Needs: H | Owns: `backend/api/decisions.py`
   Prompt: Implement `decide(flag_id, action, note)` and `get_audit(statement_id)` using the shared shapes: validate the action, require a note for `escalate`, update flag status, write one audit record with the hardcoded advisor and a UTC timestamp, and refuse a second decision on a flag that is no longer `open`.
   Done when: tests cover each action, a missing note on escalate, and a double decision.
-- [ ] **M. API handler** | Needs: H, N; calls G, J, L (use stubs until merged) | Owns: `backend/api/handler.py`
+- [x] **M. API handler** | Needs: H, N; calls G, J, L (use stubs until merged) | Owns: `backend/api/handler.py`
   Prompt: One Lambda handler for API Gateway (proxy integration) that routes the six endpoints in `CLAUDE.md` section 5. `POST /process` accepts a file upload or `{"filename": "problem.pdf"}`, maps the filename to a statement id, and if the id is unknown returns 400 "demo supports sample statements only". It runs the flag runner, then returns the id. `GET /summary/{id}` runs the summarizer and Polly once, then caches. All responses include CORS headers. Add `backend/api/local_server.py` using `http.server` so the frontend can run against it with no AWS deployment.
   Done when: `python backend/api/local_server.py` serves all six endpoints on localhost:8000 with `STORE=local` and the `--mock` summarizer.
-- [ ] **O. Textract diff** | Needs: A, E | Owns: `backend/api/textract_check.py`
+- [x] **O. Textract diff** | Needs: A, E | Owns: `backend/api/textract_check.py`
   Prompt: Write `diff_against_ground_truth(statement_id)`: send `data/pdfs/<id>.pdf` to Textract `AnalyzeDocument` (TABLES + FORMS), pull out the dollar amounts and dates, and report which ground-truth figures were found and which were not. Output a small JSON report (found, missing, match_rate). This is a side check only and must never block the demo path.
   Done when: running it on both PDFs prints a match_rate and does not raise.
 
