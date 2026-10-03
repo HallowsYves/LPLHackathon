@@ -1,0 +1,11 @@
+{
+  "text": "Synthetic sample statement. Tested on sample data.\n\nHere is your statement summary for 2026-Q3, Jonathan.\n\nYour accounts together are worth $544,444.07. At the start of the period they were worth $538,750.37.\nYour IRA ended at $417,540.04, up $5,239.92.\nYour Individual brokerage ended at $126,904.03, up $453.78.\n\nMoney sent out this period: 3 payments totaling $2,400.\nThe largest was $800 on 2026-07-05 to Riverbend Credit Union (Hale checking).\n\nFees paid this period: $655. Last period they were $640.\n\nQuestions to ask your advisor:\n1. Can you explain the $800 payment on 2026-07-05?\n2. What does each fee on this statement cover?\n3. Is there anything on this statement you would like to go over with me?",
+  "validation": {
+    "figures_checked": 11,
+    "mismatches": [],
+    "attempts": 0,
+    "used_fallback": true
+  },
+  "statement_id": "clean",
+  "audio_url": ""
+}

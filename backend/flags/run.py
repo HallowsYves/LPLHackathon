@@ -13,15 +13,17 @@ from backend.flags import rules
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def run_flags(statement_id):
+def run_flags(statement_id, statement=None):
     """Run all rules on data/ground_truth/<id>.json and save the flags.
 
     Idempotent: save_flags replaces that statement's flags. Returns the saved flags.
     """
-    with open(os.path.join(ROOT, "data", "ground_truth", f"{statement_id}.json")) as fh:
-        statement = json.load(fh)
+    if statement is None:
+        with open(os.path.join(ROOT, "data", "ground_truth", f"{statement_id}.json")) as fh:
+            statement = json.load(fh)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    flags = [{"id": f"f{i}", **flag, "statement_id": statement_id, "created_at": now, "status": "open"}
+    prefix = f'{statement_id}-' if statement_id.startswith('upload-') else ''
+    flags = [{"id": f"{prefix}f{i}", **flag, "statement_id": statement_id, "created_at": now, "status": "open"}
              for i, flag in enumerate(rules.run_all(statement), 1)]
     return store.save_flags(statement_id, flags)
 
