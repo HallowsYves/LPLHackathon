@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f4e9c">
+  <title>Clear Statement — Advisor review</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script>
+  <script type="module" src="advisor.js"></script>
+</head>
+<body class="advisor-page">
+  <a class="skip-link" href="#main">Skip to advisor review</a>
+  <header class="site-header">
+    <a id="brand-link" class="brand" href="index.html"><svg class="brand-mark" aria-hidden="true" viewBox="0 0 44 52" focusable="false">
+      <rect x="2" y="6" width="40" height="40" rx="10" fill="currentColor" />
+      <path d="M14 18H26 M14 26H30 M14 34H24" stroke="var(--button-text)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="28" cy="34" r="3" fill="var(--logo-dot)" />
+    </svg> Clear Statement</a>
+    <nav class="header-actions" aria-label="Statement navigation">
+      <a id="client-link" class="nav-link" href="index.html">Client summary</a>
+      <a class="nav-link" href="#main" aria-current="page">Advisor review</a>
+      <button id="contrast" class="secondary" type="button" aria-pressed="false">High contrast: Off</button>
+    </nav>
+  </header>
+  <main id="main">
+    <div class="intro">
+      <p class="eyebrow">Synthetic demo · Tested on sample data.</p>
+      <h1>Advisor review</h1>
+      <p class="review-assurance"><strong>A person decides.</strong> This tool never acts on an account by itself.</p>
+    </div>
+    <div id="client-context" class="client-context" aria-label="Statement context" hidden></div>
+    <button id="refresh" class="secondary" type="button">Refresh flags</button>
+    <p id="status" role="status" aria-live="polite">Loading the statement and flags…</p>
+    <p id="error" class="decision-error" role="alert" hidden></p>
+    <div id="workspace" class="advisor-workspace" aria-busy="true" hidden>
+      <aside aria-labelledby="flags-title">
+        <h2 id="flags-title">Items for your attention</h2>
+        <p id="flag-count"></p>
+        <p>Review each reason and its statement details. Worth a call.</p>
+        <ul id="flag-list" class="flag-list"></ul>
+        <p id="empty" hidden>No flags for this statement.</p>
+      </aside>
+      <section id="detail" class="review-detail panel" aria-labelledby="detail-title" hidden>
+        <p class="step">Selected flag</p>
+        <h2 id="detail-title"></h2>
+        <div class="review-callout">
+          <h3>Why this was flagged</h3>
+          <p id="reason"></p>
+          <p id="flag-status"></p>
+          <div id="fee-context" hidden></div>
+        </div>
+        <p id="transaction-help"></p>
+        <table id="transactions">
+          <caption>Statement transactions</caption>
+          <thead><tr><th scope="col">Date / account</th><th scope="col">Activity / payee</th><th scope="col">Amount</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="advisor-notes">
+          <label for="note">Advisor notes</label>
+          <p id="note-help">A note is required to Escalate. Notes are optional for Approve and Dismiss.</p>
+          <textarea id="note" rows="4" aria-describedby="note-help decision-error"></textarea>
+        </div>
+        <p id="closed" class="review-assurance" hidden></p>
+        <p id="decision-error" class="decision-error" role="alert" hidden></p>
+        <div class="decision-actions" aria-label="Record a decision">
+          <button type="button" data-action="approve">Approve</button>
+          <button type="button" class="secondary" data-action="escalate">Escalate</button>
+          <button type="button" class="secondary" data-action="dismiss">Dismiss</button>
+        </div>
+        <p class="review-assurance">These actions record your review decision. Nothing happens to the account automatically.</p>
+      </section>
+    </div>
+    <!-- Task W: reserved mount only; no audit requests or behavior in Task V. -->
+    <section id="audit-section" class="audit-panel panel" aria-label="Audit trail" hidden></section>
+    <footer>Clear Statement · Synthetic sample, not a real statement.<br>Tested on sample data.</footer>
+  </main>
+</body>
+</html>
