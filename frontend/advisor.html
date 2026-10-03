@@ -13,16 +13,19 @@
 <body class="advisor-page">
   <a class="skip-link" href="#main">Skip to advisor review</a>
   <header class="site-header">
-    <a id="brand-link" class="brand" href="index.html"><svg class="brand-mark" aria-hidden="true" viewBox="0 0 44 52" focusable="false">
+    <a id="brand-link" class="brand" data-page="home.html" href="home.html?statement_id=problem"><svg class="brand-mark" aria-hidden="true" viewBox="0 0 44 52" focusable="false">
       <rect x="2" y="6" width="40" height="40" rx="10" fill="currentColor" />
       <path d="M14 18H26 M14 26H30 M14 34H24" stroke="var(--button-text)" stroke-width="4" stroke-linecap="round" />
       <circle cx="28" cy="34" r="3" fill="var(--logo-dot)" />
     </svg> Clear Statement</a>
     <nav class="header-actions" aria-label="Statement navigation">
-      <a id="client-link" class="nav-link" href="index.html">Client summary</a>
-      <a class="nav-link" href="#main" aria-current="page">Advisor review</a>
-      <button id="contrast" class="secondary" type="button" aria-pressed="false">High contrast: Off</button>
+      <a id="home-link" class="nav-link" data-page="home.html" href="home.html?statement_id=problem"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10h-6v-7H9v7H3z"/></svg><span>Home</span></a>
+      <a id="client-link" class="nav-link" data-page="index.html" href="index.html?statement_id=problem"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6"/></svg><span>Client Summary</span></a>
+      <span class="nav-link current-page" aria-current="page"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v4H9zM8 14l3 3 5-6"/></svg><span>Advisor Review</span></span>
     </nav>
+    <div class="header-tools">
+      <button id="contrast" class="secondary" type="button" aria-pressed="false">High contrast: Off</button>
+    </div>
   </header>
   <main id="main">
     <div class="intro">
@@ -65,14 +68,14 @@
         <p id="closed" class="review-assurance" hidden></p>
         <p id="decision-error" class="decision-error" role="alert" hidden></p>
         <div class="decision-actions" aria-label="Record a decision">
-          <button type="button" data-action="approve">Approve</button>
-          <button type="button" class="secondary" data-action="escalate">Escalate</button>
-          <button type="button" class="secondary" data-action="dismiss">Dismiss</button>
+          <button type="button" data-action="approve"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m7 12 3 3 7-7"/></svg><span>Approve</span></button>
+          <button type="button" class="secondary" data-action="escalate"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v4H9zM8 14l3 3 5-6"/></svg><span>Escalate</span></button>
+          <button type="button" class="secondary" data-action="dismiss"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12M18 6 6 18"/></svg><span>Dismiss</span></button>
         </div>
         <p class="review-assurance">These actions record your review decision. Nothing happens to the account automatically.</p>
       </section>
     </div>
-    <!-- Task W: reserved mount only; no audit requests or behavior in Task V. -->
+    <!-- Audit panel populated by Task W. -->
     <section id="audit-section" class="audit-panel panel" aria-label="Audit trail" hidden></section>
     <footer>Clear Statement · Synthetic sample, not a real statement.<br>Tested on sample data.</footer>
   </main>

@@ -1,3 +1,4 @@
+import { setStatementContext } from './navigation.js';
 import { getStatement, getFlags, decideFlag } from './api.js';
 
 const byId = id => document.getElementById(id);
@@ -201,9 +202,7 @@ async function decide(action) {
   }
 }
 
-const clientUrl = `index.html?statement_id=${encodeURIComponent(statementId)}`;
-byId('client-link').href = clientUrl;
-byId('brand-link').href = clientUrl;
+setStatementContext(statementId);
 byId('note').addEventListener('input', () => {
   if (selectedId) drafts.set(selectedId, byId('note').value);
   byId('note').removeAttribute('aria-invalid');
@@ -211,11 +210,7 @@ byId('note').addEventListener('input', () => {
 });
 byId('refresh').addEventListener('click', refresh);
 actions.forEach(button => button.addEventListener('click', () => decide(button.dataset.action)));
-byId('contrast').addEventListener('click', () => {
-  const enabled = document.body.classList.toggle('high-contrast');
-  byId('contrast').setAttribute('aria-pressed', String(enabled));
-  byId('contrast').textContent = `High contrast: ${enabled ? 'On' : 'Off'}`;
-});
+
 
 // Audit section — Task W. All audit UI, requests and notification behavior stay here.
 const { getAudit } = await import('./api.js');

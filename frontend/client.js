@@ -1,3 +1,4 @@
+import { setStatementContext } from './navigation.js';
 import { processStatement, getStatement, getSummary } from './api.js';
 
 const byId = id => document.getElementById(id);
@@ -75,7 +76,7 @@ async function load(input, process = true) {
     const [statement, summary] = await Promise.all([getStatement(id), getSummary(id)]);
     renderStatement(statement);
     renderSummary(summary);
-    byId('advisor-link').href = `advisor.html?statement_id=${encodeURIComponent(id)}`;
+    setStatementContext(id);
     byId('comparison').hidden = false;
     byId('status').textContent = `Ready: ${statement.client.name} · ${statement.period} · Tested on sample data.`;
   } catch (error) {
@@ -94,15 +95,15 @@ byId('upload').addEventListener('change', event => {
   const file = event.target.files[0];
   if (file) load(file);
 });
-byId('contrast').addEventListener('click', () => {
-  const enabled = document.body.classList.toggle('high-contrast');
-  byId('contrast').setAttribute('aria-pressed', String(enabled));
-  byId('contrast').textContent = `High contrast: ${enabled ? 'On' : 'Off'}`;
-});
+
 
 // Audio section — Task U. All audio UI and integration stay in this section.
 const audioSection = byId('audio-section');
-const readAloud = element('button', 'Read aloud');
+const readAloud = element('button');
+const audioIcon = element('span');
+audioIcon.setAttribute('aria-hidden', 'true');
+const readAloudLabel = element('span', 'Read aloud');
+readAloud.append(audioIcon, readAloudLabel);
 readAloud.id = 'read-aloud';
 readAloud.type = 'button';
 readAloud.className = 'read-aloud';
@@ -124,8 +125,9 @@ let audioTimer;
 function setAudioState(state, message) {
   audioState = state;
   readAloud.disabled = state === 'unavailable' || state === 'loading';
-  readAloud.textContent = ({ playing: 'Pause reading', paused: 'Resume reading',
+  readAloudLabel.textContent = ({ playing: 'Pause reading', paused: 'Resume reading',
     loading: 'Loading audio…', error: 'Retry read aloud' })[state] || 'Read aloud';
+  audioIcon.innerHTML = state === 'playing' ? '<svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8v8M14 8v8"/></svg>' : '<svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h4l5-4v14l-5-4H3zM16 8a6 6 0 0 1 0 8M19 5a10 10 0 0 1 0 14"/></svg>';
   readAloud.setAttribute('aria-pressed', String(state === 'playing'));
   readAloud.setAttribute('aria-busy', String(state === 'loading'));
   audioStatus.textContent = message;
@@ -222,3 +224,13 @@ setAudioState('unavailable', audioStatus.textContent);
 // Reading on initial load preserves any decisions already made in this tab.
 const initialStatementId = new URLSearchParams(window.location.search).get('statement_id') || 'problem';
 load(initialStatementId, false);
+
+// Client-only reading size. This is a page-local setting, not a stored preference.
+const readingSizes = ['standard', 'large', 'largest'];
+let readingSizeIndex = 0;
+byId('text-size').addEventListener('click', () => {
+  readingSizeIndex = (readingSizeIndex + 1) % readingSizes.length;
+  const size = readingSizes[readingSizeIndex];
+  document.body.dataset.readingSize = size;
+  byId('text-size-label').textContent = `Text size: ${size[0].toUpperCase()}${size.slice(1)}`;
+});
