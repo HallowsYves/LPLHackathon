@@ -122,10 +122,10 @@ Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high con
 - [x] **V. Advisor view** | Needs: S | Owns: `frontend/advisor.html`, `frontend/advisor.js`
   Prompt: A flag list showing rule, reason and status. Selecting a flag highlights its transactions in a table. Approve, Escalate and Dismiss buttons with a note box (required for Escalate) call the decision endpoint and update the row. No "fraud" wording anywhere in the UI.
   Done when: against mocks, escalating without a note is blocked and escalating with one updates the flag status.
-- [ ] **W. Audit trail panel** | Needs: V | Owns: `frontend/advisor.js` (audit section only)
+- [x] **W. Audit trail panel** | Needs: V | Owns: `frontend/advisor.js` (audit section only)
   Prompt: A panel on the advisor page listing audit records newest first (who, action, note, time), refreshed after every decision, plus an "alert sent to advisor" line shown after a new flag appears (the UI shows it regardless of SES).
   Done when: a decision made in the page appears in the panel without a reload.
-- [ ] **X. Go live** | Needs: T, U, V, W, and either M (local server) or R (deployed) | Owns: `frontend/config.js`
+- [x] **X. Go live** | Needs: T, U, V, W, and either M (local server) or R (deployed) | Owns: `frontend/config.js`
   Prompt: Flip `USE_MOCK` to false, point `API_BASE` at the local server or the deployed API, and fix any shape mismatches by correcting the frontend, not the contract. Walk the full demo flow.
   Done when: upload, summary, read-aloud, flags, escalate and audit all work end to end.
 
