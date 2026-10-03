@@ -1,0 +1,12 @@
+{
+  "statement_id": "problem",
+  "text": "Muestra sintética del estado de cuenta. Probado con datos de muestra.\n\nAquí está el resumen de su estado de cuenta para 2026-Q3, Margaret.\n\nSus cuentas en conjunto valen $490,517.57. Al inicio del período valían $538,750.37.\nSu IRA terminó en $417,163.54, con un aumento de $4,863.42.\nSu cuenta de corretaje individual terminó en $73,354.03, con una disminución de $53,096.22.\n\nDinero enviado este período: 7 pagos por un total de $55,950.\nEl mayor fue $48,000 el 2026-09-12 a Greenfield Holdings LLC.\n\nComisiones pagadas este período: $1,031.50. El período anterior fueron $640.\n\nPreguntas para hacerle a su asesor:\n1. ¿Puede explicar el pago de $48,000 del 2026-09-12?\n2. ¿Qué cubre cada comisión en este estado de cuenta?\n3. ¿Hay algo en este estado de cuenta que le gustaría revisar conmigo?",
+  "validation": {
+    "figures_checked": 11,
+    "mismatches": [],
+    "attempts": 0,
+    "used_fallback": true
+  },
+  "audio_url": null,
+  "machine_translated": true
+}

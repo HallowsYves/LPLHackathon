@@ -5,6 +5,7 @@ const money = value => new Intl.NumberFormat('en-US', { style: 'currency', curre
 const controls = [byId('sample'), byId('upload')];
 let statementReady = false;
 let activeStatementId = new URLSearchParams(location.search).get('statement_id') || sessionStorage.getItem('clear-statement.active-id') || 'problem';
+let activeLang = 'en';
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -100,6 +101,11 @@ function renderSummary(summary) {
   if (validation.mismatches.length) {
     byId('summary').replaceChildren(element('p', 'This summary needs a number check. Please refer to the original statement and ask your advisor to review it.'));
   }
+  // Show or hide the machine-translated notice.
+  const notice = byId('machine-translated-notice');
+  if (notice) {
+    notice.hidden = !summary.machine_translated;
+  }
 }
 
 async function load(input, process = true) {
@@ -111,7 +117,7 @@ async function load(input, process = true) {
   byId('status').textContent = 'Loading your sample statement and checking the summary…';
   try {
     const id = process ? (await processStatement(input)).statement_id : activeStatementId;
-    const [statement, summary] = await Promise.all([getStatement(id), getSummary(id)]);
+    const [statement, summary] = await Promise.all([getStatement(id), getSummary(id, activeLang)]);
     renderStatement(statement);
     renderSummary(summary);
     const originalLink = document.querySelector('.original .panel-heading a');
@@ -151,6 +157,28 @@ byId('contrast').addEventListener('click', () => {
   byId('contrast').textContent = enabled ? '◐ High contrast: On' : '◐ High contrast: Off';
 });
 
+// Language switcher — Task AA. Re-fetches only the summary in the chosen language.
+langSelect.addEventListener('change', async () => {
+  if (!statementReady) return;
+  activeLang = langSelect.value;
+  resetAudio();
+  byId('comparison').setAttribute('aria-busy', 'true');
+  byId('status').textContent = 'Loading summary…';
+  try {
+    const summary = await getSummary(activeStatementId, activeLang);
+    renderSummary(summary);  // hooked version calls configureAudio internally
+    byId('status').textContent = activeLang === 'es'
+      ? 'Resumen listo · Tested on sample data.'
+      : 'Ready · Tested on sample data.';
+  } catch (error) {
+    byId('error').textContent = `${error.message || 'Could not load summary.'} Please try again.`;
+    byId('error').hidden = false;
+    byId('status').textContent = 'Summary could not be loaded.';
+  } finally {
+    byId('comparison').setAttribute('aria-busy', 'false');
+  }
+});
+
 // Audio section — Task U. All audio UI and integration stay in this section.
 const audioSection = byId('audio-section');
 const readAloud = element('button', 'Read aloud');
@@ -167,7 +195,33 @@ const audioError = element('p');
 audioError.id = 'audio-error';
 audioError.setAttribute('role', 'alert');
 audioError.hidden = true;
-audioSection.append(readAloud, audioStatus, audioError);
+
+// Language selector — Task AA.
+const langRow = element('div');
+langRow.className = 'lang-row';
+const langLabel = element('label', 'Language');
+langLabel.htmlFor = 'lang-select';
+langLabel.className = 'lang-label';
+const langSelect = element('select');
+langSelect.id = 'lang-select';
+langSelect.setAttribute('aria-label', 'Summary language');
+for (const [value, display] of [['en', 'English'], ['es', 'Español']]) {
+  const opt = element('option', display);
+  opt.value = value;
+  if (value === activeLang) opt.selected = true;
+  langSelect.append(opt);
+}
+langRow.append(langLabel, langSelect);
+
+// Machine-translated notice — shown when summary.machine_translated is true.
+const machineNotice = element('p');
+machineNotice.id = 'machine-translated-notice';
+machineNotice.className = 'machine-translated-notice';
+machineNotice.setAttribute('role', 'note');
+machineNotice.textContent = 'Machine translated · Figures verified, wording translated automatically.';
+machineNotice.hidden = true;
+
+audioSection.append(langRow, machineNotice, readAloud, audioStatus, audioError);
 
 let summaryAudio = null;
 let audioState = 'unavailable';

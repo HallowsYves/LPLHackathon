@@ -100,20 +100,29 @@ def process(event):
     return 200, {"statement_id": sid, "flags_created": len(flags)}
 
 
-def summary(sid):
-    if sid not in _summary_cache:
+_SUPPORTED_LANGS = {"en", "es"}
+
+
+def summary(sid, lang="en"):
+    if lang not in _SUPPORTED_LANGS:
+        raise HttpError(400, f"unsupported lang '{lang}'; supported: en, es")
+    cache_key = (sid, lang)
+    if cache_key not in _summary_cache:
         from backend.summary.summarize import summarize
-        result = {'statement_id': sid, **summarize(_statement(sid), mock=os.environ.get('SUMMARY_MOCK') == '1')}
+        stmt = _statement(sid)
+        result = {
+            'statement_id': sid,
+            **summarize(stmt, mock=os.environ.get('SUMMARY_MOCK') == '1', lang=lang),
+        }
         result["audio_url"] = None
         if os.environ.get("AUDIO_BUCKET"):
             try:
                 from backend.summary.speak import speak
-                result["audio_url"] = speak(sid, result["text"])
+                result["audio_url"] = speak(sid, result["text"], lang=lang)
             except Exception as e:  # read-aloud must never break the summary
                 print(f"speak failed: {e}")
-        _statement(sid)
-        _summary_cache[sid] = result
-    return 200, _summary_cache[sid]
+        _summary_cache[cache_key] = result
+    return 200, _summary_cache[cache_key]
 
 
 def decision(flag_id, event):
@@ -149,7 +158,7 @@ def route(event):
             return 200, _statement(sid)
         if kind == "summary":
             _statement(sid)
-            return summary(sid)
+            return summary(sid, lang=q.get("lang", "en"))
         _statement(sid)
         return 200, decisions.get_audit(sid)
     raise HttpError(404, "not found")

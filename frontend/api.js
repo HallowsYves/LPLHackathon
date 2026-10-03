@@ -95,11 +95,23 @@ export async function getStatement(id) {
   return fixture("statement.json");
 }
 
-export async function getSummary(id) {
-  if (!mockEnabled()) return request(`/summary/${encodeURIComponent(id)}`);
+export async function getSummary(id, lang = "en") {
+  if (!mockEnabled()) {
+    const qs = lang && lang !== "en" ? `?lang=${encodeURIComponent(lang)}` : "";
+    return request(`/summary/${encodeURIComponent(id)}${qs}`);
+  }
   requireStatement(id);
-  const result = await fixture("summary.json");
-  result.audio_url = new URL(result.audio_url, mockRoot).href;
+  // For mock mode use the Spanish fixture when lang=es, falling back to the
+  // English fixture (which is also used as the fallback if the Spanish file is absent).
+  const fixture_name = lang === "es" ? "summary_es.json" : "summary.json";
+  let result;
+  try {
+    result = await fixture(fixture_name);
+  } catch {
+    result = await fixture("summary.json");
+    result.machine_translated = false;
+  }
+  result.audio_url = result.audio_url ? new URL(result.audio_url, mockRoot).href : null;
   return result;
 }
 

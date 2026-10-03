@@ -8,12 +8,17 @@ against the statement; on a mismatch (or a banned word) we regenerate up to
 MAX_ATTEMPTS times, telling the model what was wrong. If every attempt fails we
 return a deterministic template filled straight from the JSON (used_fallback true).
 
+Pass lang="es" to get a machine-translated Spanish summary via translate_summary.
+The English summary is always generated and validated first; translation happens after.
+If figures do not survive translation, the English text is returned with
+machine_translated=False. "en" (default) skips translation entirely.
+
 Env: AWS_REGION, BEDROCK_MODEL_ID; optional GUARDRAIL_ID and GUARDRAIL_VERSION
 (version defaults to DRAFT) are applied to the model's output when set. They are
 not applied to the input: the statement JSON itself (IRA, brokerage, wires) trips the
 investment-advice topic, and the point is to police what the model writes.
 
-Usage: python -m backend.summary.summarize problem [--mock]
+Usage: python -m backend.summary.summarize problem [--mock] [--lang=es]
 """
 import json
 import os
@@ -103,38 +108,67 @@ def _guardrail_blocks(text):
     return r["action"] == "GUARDRAIL_INTERVENED"
 
 
-def summarize(statement, mock=False, client=None):
-    """Return {"text", "validation"}; validation has figures_checked, mismatches, attempts, used_fallback."""
+def summarize(statement, mock=False, client=None, lang="en"):
+    """Return {"text", "validation", "machine_translated": bool}.
+
+    lang="en" (default): English only.
+    lang="es": English summary is generated and validated first, then translated
+               via Amazon Translate. If figures fail post-translation validation,
+               falls back to English with machine_translated=False.
+    validation has figures_checked, mismatches, attempts, used_fallback.
+    """
     if mock:
         text = template_summary(statement)
         v = validate(text, statement)
-        return {"text": text, "validation": {**v, "attempts": 0, "used_fallback": True}}
-    client = client or _client()
-    problems = []
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        text = _generate(client, statement, problems)
-        if text is None:
-            problems = ["the response was blocked by a safety filter; keep to plain facts about the statement"]
-            continue
-        v = validate(text, statement)
-        bad = [w for w in BANNED if w in text.lower()]
-        problems = [f"figure {m} is not in the data" for m in v["mismatches"]] \
-            + [f"do not use the word '{w}'" for w in bad]
-        if not problems:
-            return {"text": text, "validation": {**v, "attempts": attempt, "used_fallback": False}}
-    text = template_summary(statement)
-    v = validate(text, statement)
-    return {"text": text, "validation": {**v, "attempts": MAX_ATTEMPTS, "used_fallback": True}}
+        result = {"text": text, "validation": {**v, "attempts": 0, "used_fallback": True},
+                  "machine_translated": False}
+    else:
+        client = client or _client()
+        problems = []
+        result = None
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            text = _generate(client, statement, problems)
+            if text is None:
+                problems = ["the response was blocked by a safety filter; keep to plain facts about the statement"]
+                continue
+            v = validate(text, statement)
+            bad = [w for w in BANNED if w in text.lower()]
+            problems = [f"figure {m} is not in the data" for m in v["mismatches"]] \
+                + [f"do not use the word '{w}'" for w in bad]
+            if not problems:
+                result = {"text": text, "validation": {**v, "attempts": attempt, "used_fallback": False},
+                          "machine_translated": False}
+                break
+        if result is None:
+            text = template_summary(statement)
+            v = validate(text, statement)
+            result = {"text": text, "validation": {**v, "attempts": MAX_ATTEMPTS, "used_fallback": True},
+                      "machine_translated": False}
+
+    if lang != "en":
+        from backend.summary.translate import translate_summary
+        if mock:
+            # In mock mode skip the AWS Translate call; return the English text
+            # with machine_translated=False so the UI shows the fallback notice.
+            result["machine_translated"] = False
+        else:
+            tr = translate_summary(result["text"], lang, statement)
+            result["text"] = tr["text"]
+            result["machine_translated"] = tr["machine_translated"]
+
+    return result
 
 
-def summarize_id(statement_id, mock=False):
+def summarize_id(statement_id, mock=False, lang="en"):
     with open(os.path.join(ROOT, "data", "ground_truth", f"{statement_id}.json")) as fh:
         statement = json.load(fh)
-    return {"statement_id": statement_id, **summarize(statement, mock=mock)}
+    return {"statement_id": statement_id, **summarize(statement, mock=mock, lang=lang)}
 
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    result = summarize_id(args[0] if args else "problem", mock="--mock" in sys.argv)
+    lang_arg = next((a.split("=")[1] for a in sys.argv[1:] if a.startswith("--lang=")), "en")
+    result = summarize_id(args[0] if args else "problem", mock="--mock" in sys.argv, lang=lang_arg)
     print(result["text"])
+    print(f"\nmachine_translated: {result.get('machine_translated', False)}")
     print("\n" + json.dumps(result["validation"]))
