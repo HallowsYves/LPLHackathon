@@ -1,7 +1,12 @@
 import { getFlags, getStatement, decideFlag } from './api.js';
 
 const byId = id => document.getElementById(id);
-const statementId = 'problem';
+const statementId = new URLSearchParams(location.search).get('statement_id') || sessionStorage.getItem('clear-statement.active-id') || 'problem';
+for (const link of document.querySelectorAll('a[href^="index.html"]')) {
+  const destination = new URL(link.href);
+  destination.searchParams.set('statement_id', statementId);
+  link.href = destination.href;
+}
 const titles = {
   large_wire_new_payee: 'Large wire to a new payee',
   rapid_withdrawals: 'Rapid repeated withdrawals',
@@ -189,7 +194,7 @@ async function loadReview() {
     renderFlags();
     renderDetails();
     byId('review').hidden = false;
-    byId('status').textContent = 'Review ready. Tested on sample data.';
+    byId('status').textContent = `Review ready. Tested on sample data. ${statement.extraction_notice || ''}`;
   } catch (error) {
     byId('review').hidden = true;
     byId('error').textContent = `${error.message || 'Review could not be loaded.'} Select Refresh review to retry.`;
@@ -263,6 +268,87 @@ byId('text-size').addEventListener('click', () => {
   byId('text-size').textContent = `Aa Text size: ${['A', 'A+', 'A++'][textSizeIndex]}`;
 });
 
-// Audit section — reserved for Task W.
+// Audit section — Task W. Uses the existing decision event and review mount.
+const { getAudit } = await import('./api.js');
+const auditPanel = byId('audit-section');
+auditPanel.className = 'transactions-card';
+auditPanel.setAttribute('aria-labelledby', 'audit-title');
+const auditHeading = element('h2', 'Audit trail');
+auditHeading.id = 'audit-title';
+const notification = element('p');
+notification.setAttribute('role', 'status');
+notification.className = 'assurance';
+notification.hidden = true;
+const auditRefresh = element('button', 'Refresh audit trail', 'secondary');
+auditRefresh.type = 'button';
+const auditStatus = element('p', 'Loading audit records…');
+auditStatus.setAttribute('role', 'status');
+const auditError = element('p');
+auditError.setAttribute('role', 'alert');
+auditError.hidden = true;
+const auditRecords = element('div');
+auditRecords.id = 'audit-records';
+auditPanel.append(auditHeading, notification, auditRefresh, auditStatus, auditError, auditRecords);
+auditPanel.hidden = false;
+let auditRequest = 0;
+const observedFlags = new Set();
+
+async function refreshAudit() {
+  const request = ++auditRequest;
+  auditPanel.setAttribute('aria-busy', 'true');
+  auditRefresh.disabled = true;
+  auditStatus.textContent = 'Loading audit records…';
+  auditError.hidden = true;
+  try {
+    const records = await getAudit(statementId);
+    if (request !== auditRequest) return;
+    const newestFirst = [...records].reverse().sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+    auditRecords.replaceChildren(...newestFirst.map(record => {
+      const entry = element('article', undefined, 'advisor-note');
+      entry.dataset.auditId = record.id;
+      entry.append(element('h3', `${record.action} · Flag ${record.flag_id.split('-').pop()}`));
+      entry.append(element('p', `Who: ${record.advisor}`));
+      entry.append(element('p', `Note: ${record.note || 'No note provided.'}`));
+      const timestamp = new Date(record.timestamp);
+      const time = element('time', Number.isNaN(timestamp.getTime()) ? record.timestamp :
+        new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'long', timeZone: 'UTC' }).format(timestamp));
+      time.dateTime = record.timestamp;
+      entry.append(time);
+      return entry;
+    }));
+    auditStatus.textContent = records.length
+      ? `${records.length} saved ${records.length === 1 ? 'decision' : 'decisions'} · Newest first. Tested on sample data.`
+      : 'No decisions recorded for this statement. Tested on sample data.';
+  } catch (error) {
+    if (request !== auditRequest) return;
+    auditError.textContent = `Could not refresh the audit trail. ${error.message || ''} Select Refresh audit trail to retry. Saved decisions are unchanged.`;
+    auditError.hidden = false;
+    auditStatus.textContent = 'Previously displayed records may be out of date.';
+  } finally {
+    if (request === auditRequest) {
+      auditPanel.setAttribute('aria-busy', 'false');
+      auditRefresh.disabled = false;
+    }
+  }
+}
+
+// Observe successful review loads without changing Task V's rendering section.
+new MutationObserver(() => {
+  if (loading || byId('review').hidden) return;
+  const newFlags = flags.filter(flag => {
+    const key = JSON.stringify([flag.id, flag.created_at]);
+    const unseen = !observedFlags.has(key);
+    observedFlags.add(key);
+    return unseen && flag.status === 'open';
+  });
+  if (newFlags.length) {
+    notification.textContent = `Alert sent to advisor · Simulated demo notification for ${newFlags.length} newly observed ${newFlags.length === 1 ? 'flag' : 'flags'}. Tested on sample data.`;
+    notification.hidden = false;
+  }
+}).observe(byId('review'), { attributes: true, attributeFilter: ['aria-busy'] });
+document.addEventListener('advisor-decision-saved', refreshAudit);
+auditRefresh.addEventListener('click', refreshAudit);
+byId('refresh').addEventListener('click', refreshAudit);
+refreshAudit();
 
 loadReview();

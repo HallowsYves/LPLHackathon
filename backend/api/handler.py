@@ -46,6 +46,12 @@ def known_ids():
 
 
 def _statement(sid):
+    if sid.startswith('upload-'):
+        from backend.api import uploads
+        try:
+            return uploads.load(sid)
+        except KeyError:
+            raise HttpError(404, 'unknown uploaded statement')
     if sid not in known_ids():
         raise HttpError(404, f"unknown statement '{sid}'")
     with open(os.path.join(GT_DIR, f"{sid}.json")) as fh:
@@ -76,6 +82,16 @@ def _upload_filename(event):
 
 
 def process(event):
+    from backend.api import uploads
+    try:
+        pdf = uploads.uploaded_pdf(event)
+        if pdf is not None:
+            sid, statement = uploads.extract(pdf)
+            flags = run_flags(sid, statement)
+            return 200, {'statement_id': sid, 'flags_created': len(flags), 'extraction': 'textract',
+                         'notice': 'Tested on sample data. New payee history is limited to this statement.'}
+    except uploads.UploadError as error:
+        raise HttpError(400, str(error))
     name = _upload_filename(event)
     sid = os.path.splitext(os.path.basename(name or ""))[0].lower()
     if sid not in known_ids():
@@ -86,8 +102,8 @@ def process(event):
 
 def summary(sid):
     if sid not in _summary_cache:
-        from backend.summary.summarize import summarize_id
-        result = summarize_id(sid, mock=bool(os.environ.get("SUMMARY_MOCK")))
+        from backend.summary.summarize import summarize
+        result = {'statement_id': sid, **summarize(_statement(sid), mock=os.environ.get('SUMMARY_MOCK') == '1')}
         result["audio_url"] = None
         if os.environ.get("AUDIO_BUCKET"):
             try:

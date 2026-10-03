@@ -4,6 +4,7 @@ const byId = id => document.getElementById(id);
 const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 const controls = [byId('sample'), byId('upload')];
 let statementReady = false;
+let activeStatementId = new URLSearchParams(location.search).get('statement_id') || sessionStorage.getItem('clear-statement.active-id') || 'problem';
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -109,14 +110,25 @@ async function load(input, process = true) {
   byId('error').hidden = true;
   byId('status').textContent = 'Loading your sample statement and checking the summary…';
   try {
-    const id = process ? (await processStatement(input)).statement_id : 'problem';
+    const id = process ? (await processStatement(input)).statement_id : activeStatementId;
     const [statement, summary] = await Promise.all([getStatement(id), getSummary(id)]);
     renderStatement(statement);
     renderSummary(summary);
+    const originalLink = document.querySelector('.original .panel-heading a');
+    originalLink.hidden = id.startsWith('upload-') && !statement.original_url;
+    originalLink.href = statement.original_url || `pdfs/${encodeURIComponent(id)}.pdf`;
+    originalLink.removeAttribute('download');
+    originalLink.textContent = 'Open original synthetic PDF';
+    activeStatementId = id;
+    sessionStorage.setItem('clear-statement.active-id', id);
+    const statementUrl = new URL(location.href);
+    statementUrl.searchParams.set('statement_id', id);
+    history.replaceState(null, '', statementUrl);
+    for (const link of document.querySelectorAll('a[href^="advisor.html"]')) link.href = `advisor.html?statement_id=${encodeURIComponent(id)}`;
     statementReady = true;
     if (process) location.hash = 'summary';
     showRoute(location.hash === '#questions');
-    byId('status').textContent = `Ready: ${statement.client.name} · ${statement.period} · Tested on sample data.`;
+    byId('status').textContent = `Ready: ${statement.client.name} · ${statement.period} · Tested on sample data. ${statement.extraction_notice || ''}`;
   } catch (error) {
     byId('status').textContent = 'Statement could not be loaded.';
     byId('error').textContent = `${error.message || 'Please try again.'} Use Load sample to retry.`;

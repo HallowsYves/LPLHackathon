@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Clear Statement - sample-data demo (tested on sample data)
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@3
 
 Parameters:
   BedrockModelId:
@@ -51,6 +54,37 @@ Resources:
             AllowedOrigins: ['*']
             AllowedHeaders: ['*']
 
+  StatementBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Persist uploaded synthetic PDFs and extracted JSON across Lambda invocations.
+        must: [Private access only, Synthetic statements only]
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      VersioningConfiguration: {Status: Enabled}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  StatementBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StatementBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: [!GetAtt StatementBucket.Arn, !Sub '${StatementBucket.Arn}/*']
+            Condition: {Bool: {aws:SecureTransport: 'false'}}
+
   SiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -77,6 +111,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
+      BinaryMediaTypes: ['multipart/form-data', 'application/pdf']
       # Synthetic data only, so any origin may call the demo API. Lock this to the
       # site origin before using anything real.
       Cors:
@@ -98,10 +133,12 @@ Resources:
           GUARDRAIL_ID: !Ref GuardrailId
           GUARDRAIL_VERSION: !Ref GuardrailVersion
           AUDIO_BUCKET: !Ref AudioBucket
+          STATEMENT_BUCKET: !Ref StatementBucket
       Policies:
         - DynamoDBCrudPolicy: {TableName: !Ref FlagsTable}
         - DynamoDBCrudPolicy: {TableName: !Ref AuditTable}
         - S3CrudPolicy: {BucketName: !Ref AudioBucket}
+        - S3CrudPolicy: {BucketName: !Ref StatementBucket}
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
