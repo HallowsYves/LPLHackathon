@@ -28,7 +28,7 @@ CORS = {
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
 }
-_summary_cache = {}
+_summary_cache = {}  # keyed by (sid, lang); audio_url is re-generated each call
 
 
 class HttpError(Exception):
@@ -107,6 +107,10 @@ def summary(sid, lang="en"):
     if lang not in _SUPPORTED_LANGS:
         raise HttpError(400, f"unsupported lang '{lang}'; supported: en, es")
     cache_key = (sid, lang)
+    # Cache the generated text/validation but NOT the presigned audio URL.
+    # Presigned URLs expire after 1 hour; the Lambda container lives longer, so
+    # we regenerate the URL on every request. speak() skips Polly if the S3
+    # object already exists and its SHA256 matches, so this is cheap.
     if cache_key not in _summary_cache:
         from backend.summary.summarize import summarize
         stmt = _statement(sid)
@@ -114,15 +118,17 @@ def summary(sid, lang="en"):
             'statement_id': sid,
             **summarize(stmt, mock=os.environ.get('SUMMARY_MOCK') == '1', lang=lang),
         }
-        result["audio_url"] = None
-        if os.environ.get("AUDIO_BUCKET"):
-            try:
-                from backend.summary.speak import speak
-                result["audio_url"] = speak(sid, result["text"], lang=lang)
-            except Exception as e:  # read-aloud must never break the summary
-                print(f"speak failed: {e}")
         _summary_cache[cache_key] = result
-    return 200, _summary_cache[cache_key]
+
+    result = dict(_summary_cache[cache_key])  # shallow copy so we don't mutate the cache
+    result["audio_url"] = None
+    if os.environ.get("AUDIO_BUCKET"):
+        try:
+            from backend.summary.speak import speak
+            result["audio_url"] = speak(sid, result["text"], lang=lang)
+        except Exception as e:  # read-aloud must never break the summary
+            print(f"speak failed: {e}")
+    return 200, result
 
 
 def decision(flag_id, event):

@@ -157,28 +157,6 @@ byId('contrast').addEventListener('click', () => {
   byId('contrast').textContent = enabled ? '◐ High contrast: On' : '◐ High contrast: Off';
 });
 
-// Language switcher — Task AA. Re-fetches only the summary in the chosen language.
-langSelect.addEventListener('change', async () => {
-  if (!statementReady) return;
-  activeLang = langSelect.value;
-  resetAudio();
-  byId('comparison').setAttribute('aria-busy', 'true');
-  byId('status').textContent = 'Loading summary…';
-  try {
-    const summary = await getSummary(activeStatementId, activeLang);
-    renderSummary(summary);  // hooked version calls configureAudio internally
-    byId('status').textContent = activeLang === 'es'
-      ? 'Resumen listo · Tested on sample data.'
-      : 'Ready · Tested on sample data.';
-  } catch (error) {
-    byId('error').textContent = `${error.message || 'Could not load summary.'} Please try again.`;
-    byId('error').hidden = false;
-    byId('status').textContent = 'Summary could not be loaded.';
-  } finally {
-    byId('comparison').setAttribute('aria-busy', 'false');
-  }
-});
-
 // Audio section — Task U. All audio UI and integration stay in this section.
 const audioSection = byId('audio-section');
 const readAloud = element('button', 'Read aloud');
@@ -212,6 +190,28 @@ for (const [value, display] of [['en', 'English'], ['es', 'Español']]) {
   langSelect.append(opt);
 }
 langRow.append(langLabel, langSelect);
+
+// Language switcher — Task AA. Re-fetches only the summary in the chosen language.
+langSelect.addEventListener('change', async () => {
+  if (!statementReady) return;
+  activeLang = langSelect.value;
+  resetAudio();
+  byId('comparison').setAttribute('aria-busy', 'true');
+  byId('status').textContent = 'Loading summary…';
+  try {
+    const summary = await getSummary(activeStatementId, activeLang);
+    renderSummary(summary);  // hooked version calls configureAudio internally
+    byId('status').textContent = activeLang === 'es'
+      ? 'Resumen listo · Tested on sample data.'
+      : 'Ready · Tested on sample data.';
+  } catch (error) {
+    byId('error').textContent = `${error.message || 'Could not load summary.'} Please try again.`;
+    byId('error').hidden = false;
+    byId('status').textContent = 'Summary could not be loaded.';
+  } finally {
+    byId('comparison').setAttribute('aria-busy', 'false');
+  }
+});
 
 // Machine-translated notice — shown when summary.machine_translated is true.
 const machineNotice = element('p');
