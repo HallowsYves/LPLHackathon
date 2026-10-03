@@ -131,10 +131,10 @@ Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high con
 
 ## Track DEMO
 
-- [ ] **Y. Rehearsal and backup video** | Needs: X | Owns: `docs/demo_script.md`
+- [x] **Y. Rehearsal and backup video** | Needs: X | Owns: `docs/demo_script.md`
   Prompt: Turn the 5-minute script in `CLAUDE.md` section 8 into a timed run sheet with exact clicks. Run it three times, fix anything that stumbles, then record a backup video of a clean run.
   Done when: three clean runs and a saved video file.
-- [ ] **Z. Deck, ZIP and submission** | Needs: none to start; final numbers need Y | Owns: `docs/`
+- [x] **Z. Deck, ZIP and submission** | Needs: none to start; final numbers need Y | Owns: `docs/`
   Prompt: Research task first: run the research prompt (ask the team lead) and save sources to `docs/sources.md`. Then draft the deck (LPL template) around the pitch in `CLAUDE.md`: problem, demo, architecture slide with why each AWS service was chosen, business-impact slide using only sourced figures, roadmap (audit trail as training data for tuned thresholds, Step Functions, SES). Prepare the code ZIP (no secrets, no `.local_store/`) and the Project Submission Form. Submit with at least a 1-hour buffer before 9:00 AM PT Saturday Oct 3.
   Done when: deck, ZIP and form are ready and uploaded to Box.
 
