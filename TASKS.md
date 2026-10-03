@@ -140,7 +140,7 @@ Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high con
 
 ## Stretch (only after X works end to end)
 
-- [ ] **AA. Spanish read-aloud** | Needs: J, L, T (and M for the API param) | Owns: `backend/summary/translate.py`; small edits allowed in `summarize.py`, `speak.py`, `handler.py`, `client.js` (coordinate with their owners)
+- [x] **AA. Spanish read-aloud** | Needs: J, L, T (and M for the API param) | Owns: `backend/summary/translate.py`; small edits allowed in `summarize.py`, `speak.py`, `handler.py`, `client.js` (coordinate with their owners)
   Prompt: Add Spanish (`es`) alongside English (`en`) only; no other languages. Write `translate_summary(text, lang)` using Amazon Translate on the already-validated English summary, then re-run the number validator on the result and fall back to the English text with a visible notice if figures do not match. `speak.py` maps `en` to a neural English voice and `es` to a neural Spanish (US) voice, and the S3 cache key includes the language. `GET /summary/{id}?lang=es` returns the translated text, `audio_url` and the `validation` block. The frontend gets an English/Español dropdown beside Read aloud, and shows "Machine translated" on screen for Spanish. Guardrails and the "worth a call" tone apply to the English source before translation.
   Done when: selecting Español shows Spanish text and plays Spanish audio on `problem`, and the validation badge shows 0 mismatches.
 
