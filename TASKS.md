@@ -108,12 +108,14 @@ Pick any task whose `Needs:` is satisfied (or `none`), paste its prompt into Cla
 
 Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high contrast, keyboard accessible.
 
-- [ ] **S. Mock layer** | Needs: none | Owns: `frontend/mock/`, `frontend/api.js`, `frontend/config.js`
+- [x] **S. Mock layer** | Needs: none | Owns: `frontend/mock/`, `frontend/api.js`, `frontend/config.js`
   Prompt: Hand-write mock responses for every endpoint, matching the shapes, under `frontend/mock/`. Write `api.js` exporting one function per endpoint. `config.js` sets `API_BASE` and `USE_MOCK` (true means read the mock files). Use the `problem` statement for realism.
   Done when: opening the page with `USE_MOCK = true` returns data for all six calls from the browser console.
+  Verified 2026-10-02: browser mock check page passes all six calls, decision validation, persistence, and WAV asset checks; tested on sample data. Implementation is present in commit `38c5356`.
 - [ ] **T. Client view** | Needs: S | Owns: `frontend/index.html`, `frontend/client.js`, `frontend/styles.css`
   Prompt: A page with the original statement (an embedded PDF or rendered table) on the left and the plain-language summary in large type on the right, an upload button, a high-contrast toggle, and a small "numbers checked: N, mismatches: 0" badge from `validation`. Sample-data label visible.
   Done when: the page renders against mocks at 1280px and at phone width without horizontal scroll.
+  Implemented and verified locally 2026-10-02; pending merge. Browser checks: 1280px and 390px without horizontal overflow, all 11 transactions, validation badge (11 checked / 0 mismatches), keyboard high contrast, unsupported-upload error and Load sample recovery. Tested on sample data. AWS smoke checks are blocked by missing credentials; GitHub sync is blocked by SSH authentication.
 - [ ] **U. Read-aloud button** | Needs: T | Owns: `frontend/client.js` (audio section only)
   Prompt: A large Read aloud button with play/pause, driven by `audio_url`, with a clear loading and error state. It must be operable by keyboard.
   Done when: the button plays the mock audio and shows an error message when the URL fails.
