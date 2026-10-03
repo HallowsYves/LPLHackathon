@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#164e46">
+  <meta name="theme-color" content="#1f4e9c">
   <title>Clear Statement — Your statement, made clearer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="styles.css">
   <script src="config.js"></script>
   <script type="module" src="client.js"></script>
@@ -12,14 +13,23 @@
 <body>
   <a class="skip-link" href="#main">Skip to statement</a>
   <header class="site-header">
-    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">≋</span> Clear Statement</a>
-    <button id="contrast" class="secondary" type="button" aria-pressed="false">High contrast</button>
+    <a class="brand" href="./"><svg class="brand-mark" aria-hidden="true" viewBox="0 0 44 52" focusable="false">
+      <rect x="2" y="6" width="40" height="40" rx="10" fill="currentColor" />
+      <path d="M14 18H26 M14 26H30 M14 34H24" stroke="var(--button-text)" stroke-width="4" stroke-linecap="round" />
+      <circle cx="28" cy="34" r="3" fill="var(--logo-dot)" />
+    </svg> Clear Statement</a>
+    <nav class="header-actions" aria-label="Statement navigation">
+      <a class="nav-link" href="#main" aria-current="page">Client summary</a>
+      <!-- Stage B supplies this destination; keep the link hidden until then. -->
+      <a id="advisor-link" class="nav-link" href="advisor.html?statement_id=problem" hidden>Advisor review</a>
+      <button id="contrast" class="secondary" type="button" aria-pressed="false">High contrast: Off</button>
+    </nav>
   </header>
   <main id="main">
     <div class="intro">
       <p class="eyebrow">A little clarity. A better conversation.</p>
-      <h1>Your statement,<br>made clearer.</h1>
-      <p>See the details. Understand what changed.<br class="desktop-break"> Bring your questions to your advisor.</p>
+      <h1>Your statement, made clearer.</h1>
+      <p>See the details. Understand what changed. Bring your questions to your advisor.</p>
     </div>
     <section class="upload-bar" aria-label="Choose a sample statement">
       <div><strong>Synthetic demo</strong><p>Tested on sample data. Please use a sample PDF only.</p></div>
@@ -34,16 +44,16 @@
     <p id="error" role="alert" hidden></p>
     <div id="comparison" class="comparison" aria-busy="true" hidden>
       <section class="panel original" aria-labelledby="original-title">
-        <div class="panel-heading"><span class="step">01 / THE DETAILS</span><h2 id="original-title">Original statement</h2><p>Rendered from the statement data.</p></div>
+        <div class="panel-heading"><span class="step">The details</span><h2 id="original-title">Your original statement</h2><p>Rendered from the statement data.</p></div>
         <div id="statement"></div>
       </section>
       <section class="panel plain" aria-labelledby="summary-title">
-        <div class="panel-heading"><span class="step">02 / IN PLAIN WORDS</span><h2 id="summary-title">What it means for you</h2><p>The same numbers, with room to breathe.</p></div>
-        <p id="validation" class="validation"></p>
-        <div id="summary" class="summary"></div>
+        <div class="panel-heading"><span class="step">Your summary</span><h2 id="summary-title">In plain words</h2><p>The same numbers, with room to breathe.</p></div>
         <!-- Task U: read-aloud controls belong in this audio section. -->
         <div id="audio-section"></div>
-        <p class="advisor-note">A starting point for a conversation with your advisor. A person reviews and decides what happens next.</p>
+        <p id="validation" class="validation"></p>
+        <div id="summary" class="summary"></div>
+        <p class="advisor-note">A person at your firm reviews anything unusual. Nothing happens to your account automatically.</p>
       </section>
     </div>
     <footer>Clear Statement · Synthetic sample, not a real statement.<br>Tested on sample data.</footer>

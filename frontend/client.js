@@ -38,7 +38,9 @@ function table(caption, headings, rows) {
 
 function renderStatement(statement) {
   const content = document.createDocumentFragment();
-  content.append(element('h3', statement.client.name), element('p', `Statement period: ${statement.period}`, 'period'));
+  const context = element('div', undefined, 'statement-context');
+  context.append(element('h3', statement.client.name), element('p', `Statement period: ${statement.period}`, 'period'));
+  content.append(context);
   content.append(table('Account values', ['Account', 'Start', 'End'], statement.accounts.map(account => [
     `${account.type} (${account.id})`, money(account.start_value), money(account.end_value),
   ])));
@@ -69,10 +71,11 @@ async function load(input, process = true) {
   byId('error').hidden = true;
   byId('status').textContent = 'Loading your sample statement and checking the summary…';
   try {
-    const id = process ? (await processStatement(input)).statement_id : 'problem';
+    const id = process ? (await processStatement(input)).statement_id : input;
     const [statement, summary] = await Promise.all([getStatement(id), getSummary(id)]);
     renderStatement(statement);
     renderSummary(summary);
+    byId('advisor-link').href = `advisor.html?statement_id=${encodeURIComponent(id)}`;
     byId('comparison').hidden = false;
     byId('status').textContent = `Ready: ${statement.client.name} · ${statement.period} · Tested on sample data.`;
   } catch (error) {
@@ -94,6 +97,7 @@ byId('upload').addEventListener('change', event => {
 byId('contrast').addEventListener('click', () => {
   const enabled = document.body.classList.toggle('high-contrast');
   byId('contrast').setAttribute('aria-pressed', String(enabled));
+  byId('contrast').textContent = `High contrast: ${enabled ? 'On' : 'Off'}`;
 });
 
 // Audio section — Task U. All audio UI and integration stay in this section.
@@ -101,8 +105,7 @@ const audioSection = byId('audio-section');
 const readAloud = element('button', 'Read aloud');
 readAloud.id = 'read-aloud';
 readAloud.type = 'button';
-readAloud.style.width = '100%';
-readAloud.style.minHeight = '56px';
+readAloud.className = 'read-aloud';
 readAloud.setAttribute('aria-pressed', 'false');
 readAloud.setAttribute('aria-describedby', 'audio-status audio-error');
 const audioStatus = element('p', 'Audio will be available after the summary loads.');
@@ -217,4 +220,5 @@ new MutationObserver(() => {
 setAudioState('unavailable', audioStatus.textContent);
 
 // Reading on initial load preserves any decisions already made in this tab.
-load(null, false);
+const initialStatementId = new URLSearchParams(window.location.search).get('statement_id') || 'problem';
+load(initialStatementId, false);
