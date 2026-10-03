@@ -119,7 +119,7 @@ Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high con
 - [x] **U. Read-aloud button** | Needs: T | Owns: `frontend/client.js` (audio section only)
   Prompt: A large Read aloud button with play/pause, driven by `audio_url`, with a clear loading and error state. It must be operable by keyboard.
   Done when: the button plays the mock audio and shows an error message when the URL fails.
-- [ ] **V. Advisor view** | Needs: S | Owns: `frontend/advisor.html`, `frontend/advisor.js`
+- [x] **V. Advisor view** | Needs: S | Owns: `frontend/advisor.html`, `frontend/advisor.js`
   Prompt: A flag list showing rule, reason and status. Selecting a flag highlights its transactions in a table. Approve, Escalate and Dismiss buttons with a note box (required for Escalate) call the decision endpoint and update the row. No "fraud" wording anywhere in the UI.
   Done when: against mocks, escalating without a note is blocked and escalating with one updates the flag status.
 - [ ] **W. Audit trail panel** | Needs: V | Owns: `frontend/advisor.js` (audit section only)
