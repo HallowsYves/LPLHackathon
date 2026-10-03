@@ -116,7 +116,7 @@ Plain HTML, CSS and JS, no build step. Large type (at least 20px body), high con
   Prompt: A page with the original statement (an embedded PDF or rendered table) on the left and the plain-language summary in large type on the right, an upload button, a high-contrast toggle, and a small "numbers checked: N, mismatches: 0" badge from `validation`. Sample-data label visible.
   Done when: the page renders against mocks at 1280px and at phone width without horizontal scroll.
   Implemented and verified locally 2026-10-02; pending merge. Browser checks: 1280px and 390px without horizontal overflow, all 11 transactions, validation badge (11 checked / 0 mismatches), keyboard high contrast, unsupported-upload error and Load sample recovery. Tested on sample data. AWS smoke checks are blocked by missing credentials; GitHub sync is blocked by SSH authentication.
-- [ ] **U. Read-aloud button** | Needs: T | Owns: `frontend/client.js` (audio section only)
+- [x] **U. Read-aloud button** | Needs: T | Owns: `frontend/client.js` (audio section only)
   Prompt: A large Read aloud button with play/pause, driven by `audio_url`, with a clear loading and error state. It must be operable by keyboard.
   Done when: the button plays the mock audio and shows an error message when the URL fails.
 - [ ] **V. Advisor view** | Needs: S | Owns: `frontend/advisor.html`, `frontend/advisor.js`
