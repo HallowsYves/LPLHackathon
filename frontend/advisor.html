@@ -1,4 +1,16 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#00377d">
+  <title>Clear Statement — Advisor review</title>
+  <!-- Adapted from stitchUI/clear_statement_advisor_review/code.html,
+       stitchUI/clear_statement_logo/code.html and stitchUI/clear_statement/DESIGN.md. -->
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+  <script type="module" src="advisor.js"></script>
+  <style>
     :root { --paper: #f8f9ff; --surface: #fff; --soft: #eef4ff; --blue-soft: #dbe9fe; --line: #c3c6d3; --ink: #0e1d2b; --muted: #434751; --accent: #00377d; --accent-edge: #1f4e9c; --button-text: #fff; --amber: #eae0b5; --amber-ink: #201c02; --amber-line: #665f3d; --success: #004420; --success-soft: #e8f4eb; --error: #7f1d1d; --body-size: 22px; }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -122,60 +134,96 @@
       td::before { content: attr(data-label) ': '; font-weight: 700; }
       .related td:first-child { border-left: 4px solid var(--accent-edge); }
     }
-
-
-.home-intro { margin:24px 0 32px; } .home-intro p { max-width:65ch; color:var(--muted); }
-.home-card,.panel { padding:32px; border:1.5px solid var(--line); border-radius:16px; background:var(--surface); overflow-wrap:anywhere; min-width:0; }
-.home-card { margin:24px 0; } .home-actions,.upload-actions,.flow-actions { display:flex; flex-wrap:wrap; gap:24px; align-items:center; }
-.upload-actions { margin-top:24px; } .upload-label { display:inline-flex; align-items:center; min-height:64px; border:2px solid var(--accent-edge); padding:12px 24px; border-radius:12px; color:var(--accent); font-size:20px; font-weight:700; cursor:pointer; }
-#upload { position:absolute; width:1px; height:1px; opacity:0; }
-.upload-actions:has(#upload:focus-visible) .upload-label { outline:4px solid var(--accent-edge); outline-offset:4px; }
-.upload-actions:has(#upload:disabled) .upload-label { opacity:.6; cursor:wait; } #upload-help { color:var(--muted); }
-.flow-bar { background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:24px; margin-bottom:32px; }
-.flow-steps { display:flex; gap:24px; flex-wrap:wrap; list-style:none; margin:24px 0 0; padding:0; }
-.flow-steps a { display:block; border-radius:12px; padding:12px 16px; background:var(--soft); text-decoration:none; font-weight:700; }
-.flow-steps a[aria-current="step"] { background:var(--accent); color:var(--button-text); }
-.comparison { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:32px; align-items:start; }
-.panel-heading { margin-bottom:24px; } .panel-heading p { color:var(--muted); }
-.statement-heading { background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:24px; margin-bottom:24px; }
-.validation { padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--soft); margin:24px 0; font-size:20px; }
-.needs-review,#audio-error { border:2px solid var(--error); padding:16px; color:var(--error); }
-.summary p { white-space:pre-line; margin:24px 0; background:var(--soft); padding:24px; border-radius:12px; }
-.summary .questions { background:var(--amber); color:var(--amber-ink); border:2px solid var(--amber-line); }
-#audio-section { margin:24px 0; } #audio-section button { min-height:72px!important; } #audio-status { color:var(--muted); }
-.summary-footer { margin-top:32px; border-top:2px solid var(--line); padding-top:32px; }
-.explanation { background:var(--blue-soft); border:1px solid var(--line); border-radius:12px; padding:24px; margin-top:24px; }
-@media(max-width:1050px) { .comparison { grid-template-columns:minmax(0,1fr); } }
-@media(max-width:600px) { .home-card,.panel { padding:24px; } .flow-actions>* { width:100%; } .upload-actions>* { width:100%; } }
-@media print { .site-header,.home-view,.flow-bar,#audio-section,.flow-actions,#explain-toggle,#status,.summary-footer,.page-footer { display:none!important; } main { max-width:none; padding:0; } .comparison { display:block; } .panel { margin-bottom:24px; } body { background:white; color:#0e1d2b; } }
-
-@media print { body { --surface:#fff; --soft:#eef4ff; --ink:#0e1d2b; --muted:#434751; --line:#c3c6d3; --accent:#00377d; --amber:#eae0b5; --amber-ink:#201c02; --amber-line:#665f3d; } }
-
-/* Stitch visuals use local SVGs, so icons remain visible without an icon-font CDN. */
-.ui-icon { width:28px; height:28px; flex-shrink:0; vertical-align:middle; color:inherit; }
-button .ui-icon { margin-right:10px; }
-.icon-heading { display:flex; align-items:center; gap:16px; }
-.icon-heading>.ui-icon { color:var(--accent-edge); width:36px; height:36px; }
-.icon-badge { display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; flex-shrink:0; border-radius:50%; background:var(--accent-edge); color:var(--button-text); }
-.hero-eyebrow { color:var(--accent)!important; font-weight:700; margin:0 0 16px; }
-.home-intro { padding:32px; background:var(--blue-soft); border:1.5px solid var(--line); border-radius:16px; }
-.hero-visual { float:right; margin:0 0 24px 24px; position:relative; width:100px; height:116px; display:grid; place-items:center; border:2px solid var(--accent-edge); border-radius:16px; background:var(--surface); color:var(--accent-edge); }
-.hero-visual>.ui-icon { width:68px; height:68px; }
-.hero-seal { position:absolute; bottom:-10px; right:-10px; width:40px; height:40px; background:var(--accent-edge); color:var(--button-text); border:3px solid var(--surface); border-radius:50%; display:grid; place-items:center; }
-.home-intro::after { content:''; display:block; clear:both; }
-.home-card:has(#upload-title) { background:var(--soft); border:2px solid var(--accent-edge); }
-.sample-download { margin-top:24px; padding:24px; display:flex; align-items:flex-start; gap:24px; border-radius:12px; background:var(--amber); color:var(--amber-ink); border:2px solid var(--amber-line); }
-.sample-download p { margin:8px 0 16px; }
-.amber-badge { background:var(--surface); color:var(--amber-line); }
-.sample-chip { display:inline-block; border-radius:999px; background:var(--blue-soft); color:var(--ink); padding:4px 12px; font-size:20px; font-weight:600; }
-.summary-card { display:flex; align-items:flex-start; gap:16px; }
-.summary-body { min-width:0; }
-.summary strong { color:var(--accent); font-variant-numeric:tabular-nums; }
-.summary .questions { padding:24px; margin:24px 0; border-radius:12px; white-space:normal; }
-.questions h3 { display:flex; align-items:center; gap:12px; }
-.questions ol { padding-left:28px; } .questions li { margin-top:16px; }
-.statement-highlights { padding:24px; border:2px solid var(--amber-line); border-radius:12px; background:var(--amber); color:var(--amber-ink); margin:24px 0; }
-.statement-highlights dl { margin:16px 0 0; }
-.statement-highlights dl>div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid var(--amber-line); }
-.statement-highlights dd { margin:0; font-weight:700; font-variant-numeric:tabular-nums; }
-@media(max-width:600px) { .hero-visual { float:none; margin:0 0 24px; } .home-intro { padding:24px; } .sample-download { flex-direction:column; padding:16px; } .summary-card { flex-direction:column; } .icon-heading { align-items:flex-start; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to advisor review</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="index.html#home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 52" fill="none" aria-hidden="true">
+          <rect x="2" y="6" width="40" height="40" rx="10" fill="#1F4E9C"/>
+          <path d="M14 26H30M14 18H26M14 34H24" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="28" cy="34" r="3" fill="#F59E0B"/>
+        </svg><span>Clear Statement</span>
+      </a>
+      <nav class="header-actions" aria-label="Page and accessibility controls">
+        <a class="nav-link" href="index.html#home">Home</a>
+        <a class="nav-link" href="index.html#summary">Client summary</a>
+        <button id="text-size" class="secondary" type="button"><span aria-hidden="true" class="control-icon">Aa</span>Text size: A</button>
+        <button id="contrast" class="secondary" type="button" aria-pressed="false"><span aria-hidden="true" class="control-icon">◐</span>High contrast: Off</button>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <div class="page-heading">
+      <div><p class="breadcrumb">Accounts › <span id="breadcrumb-client">Sample client</span> › Advisor review</p><h1>Advisor review</h1></div>
+      <div class="assurance"><p><strong>A person decides.</strong> This tool never acts on an account by itself.</p></div>
+    </div>
+    <section class="client-ribbon" aria-label="Client and statement context">
+      <p><span class="context-label">Client:</span><strong id="client-context">Loading…</strong></p>
+      <p><span class="context-label">Accounts:</span><strong id="account-context">Loading…</strong></p>
+      <p><span class="context-label">Period:</span><strong id="period-context">Loading…</strong></p>
+    </section>
+    <div class="demo-bar">
+      <div><p class="demo-label">Synthetic demo · Tested on sample data</p><p>Dana Ortiz (demo advisor)</p></div>
+      <button id="refresh" class="secondary" type="button">Refresh review</button>
+    </div>
+    <p id="status" role="status">Loading sample flags…</p>
+    <p id="error" role="alert" hidden></p>
+    <div id="review" class="review-layout" aria-busy="true" hidden>
+      <aside class="queue" aria-labelledby="flags-title">
+        <div class="queue-title"><h2 id="flags-title">Items for your attention</h2><p id="flag-count"></p></div>
+        <p class="review-help">Plain-language flags for advisor verification before the client conversation.</p>
+        <ul id="flags" class="flag-list"></ul>
+        <p id="empty" hidden>No flags to review for this statement.</p>
+        <section class="progress-card" aria-labelledby="progress-title">
+          <h3 id="progress-title">Review readiness</h3>
+          <p class="review-help">Track the items with a saved advisor decision.</p>
+          <progress id="review-progress" value="0" max="3" aria-label="Flags with saved decisions"></progress>
+          <div class="progress-labels"><span id="progress-count">0 of 3 reviewed</span><span id="progress-percent">0% complete</span></div>
+        </section>
+      </aside>
+      <section class="workspace" aria-labelledby="review-title">
+        <p class="section-label">Active review</p>
+        <h2 id="review-title">Flag detail: <span id="rule-title">Select an item</span></h2>
+        <div id="selection" hidden>
+          <div class="detail-card">
+            <section class="advisory-callout" aria-labelledby="callout-title">
+              <h3 id="callout-title">Transaction verification needed</h3>
+              <div id="flag-facts"></div>
+              <div class="reason-block"><strong>Why this was flagged:</strong><p id="reason"></p></div>
+              <p id="selected-status" class="flag-status"></p>
+            </section>
+            <form id="decision-form" novalidate>
+              <label for="note">Advisor notes &amp; client conversation record</label>
+              <p id="note-help" class="review-help">Required for Escalate. Optional for Approve or Dismiss.</p>
+              <textarea id="note" aria-describedby="note-help decision-error" aria-invalid="false" placeholder="Record what you checked and the next step for this review." rows="4"></textarea>
+              <p id="decision-error" role="alert" hidden></p>
+              <div class="decision-actions">
+                <button type="submit" name="action" value="approve">Approve</button>
+                <button type="submit" name="action" value="escalate" class="secondary">Escalate</button>
+                <button type="submit" name="action" value="dismiss" class="secondary dismiss">Dismiss</button>
+              </div>
+              <p id="decision-status" role="status"></p>
+            </form>
+            <div class="advisor-note"><p><strong>A person decides.</strong> This tool never acts on an account by itself.</p></div>
+          </div>
+          <section class="transactions-card" aria-label="Supporting statement details">
+            <h3>Statement details</h3>
+            <p id="transaction-help" class="review-help"></p>
+            <div id="fee-details" hidden></div>
+            <div id="transactions"></div>
+          </section>
+        </div>
+      </section>
+    </div>
+    <!-- Task W can populate this reserved audit section using the same Stitch styling. -->
+    <section id="audit-section" hidden></section>
+  </main>
+  <footer class="page-footer"><div class="footer-inner">
+    <div class="assurance"><p><strong>A person at your firm reviews anything unusual. Nothing happens to your account automatically.</strong></p></div>
+    <p class="footer-label">Clear Statement · Synthetic sample, not a real statement. Tested on sample data.</p>
+  </div></footer>
+</body>
+</html>

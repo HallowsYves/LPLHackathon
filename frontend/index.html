@@ -1,52 +1,47 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#164e46">
-  <title>Clear Statement — Your statement, made clearer</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="config.js"></script>
-  <script type="module" src="client.js"></script>
-</head>
-<body>
-  <a class="skip-link" href="#main">Skip to statement</a>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#00377d">
+<title>Clear Statement — Your statement, made clearer</title>
+<!-- Working application adapted from stitchUI/clear_statement_summary/code.html. -->
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=stitch-visuals-2"><script src="config.js"></script><script type="module" src="client.js?v=stitch-visuals-2"></script>
+</head><body><a class="skip-link" href="#main">Skip to statement</a>
   <header class="site-header">
-    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">≋</span> Clear Statement</a>
-    <button id="contrast" class="secondary" type="button" aria-pressed="false">High contrast</button>
+    <div class="header-inner">
+      <a class="brand" href="index.html#home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 52" fill="none" aria-hidden="true">
+          <rect x="2" y="6" width="40" height="40" rx="10" fill="#1F4E9C"/>
+          <path d="M14 26H30M14 18H26M14 34H24" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="28" cy="34" r="3" fill="#F59E0B"/>
+        </svg><span>Clear Statement</span>
+      </a>
+      <nav class="header-actions" aria-label="Page and accessibility controls">
+        <a class="nav-link" href="index.html#home"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#home"></use></svg>Home</a>
+        <a class="nav-link" href="advisor.html"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#advisor"></use></svg>Advisor review</a>
+        <button id="text-size" class="secondary" type="button"><span aria-hidden="true" class="control-icon">Aa</span>Text size: A</button>
+        <button id="contrast" class="secondary" type="button" aria-pressed="false"><span aria-hidden="true" class="control-icon">◐</span>High contrast: Off</button>
+      </nav>
+    </div>
   </header>
-  <main id="main">
-    <div class="intro">
-      <p class="eyebrow">A little clarity. A better conversation.</p>
-      <h1>Your statement,<br>made clearer.</h1>
-      <p>See the details. Understand what changed.<br class="desktop-break"> Bring your questions to your advisor.</p>
-    </div>
-    <section class="upload-bar" aria-label="Choose a sample statement">
-      <div><strong>Synthetic demo</strong><p>Tested on sample data. Please use a sample PDF only.</p></div>
-      <div class="upload-actions">
-        <button type="button" id="sample">Load sample</button>
-        <label class="upload-label" for="upload">Upload sample PDF</label>
-        <input id="upload" type="file" accept=".pdf,application/pdf" aria-describedby="upload-help">
-      </div>
-      <p id="upload-help">In mock mode, choose problem.pdf.</p>
-    </section>
-    <p id="status" role="status" aria-live="polite">Loading the sample statement…</p>
-    <p id="error" role="alert" hidden></p>
-    <div id="comparison" class="comparison" aria-busy="true" hidden>
-      <section class="panel original" aria-labelledby="original-title">
-        <div class="panel-heading"><span class="step">01 / THE DETAILS</span><h2 id="original-title">Original statement</h2><p>Rendered from the statement data.</p></div>
-        <div id="statement"></div>
-      </section>
-      <section class="panel plain" aria-labelledby="summary-title">
-        <div class="panel-heading"><span class="step">02 / IN PLAIN WORDS</span><h2 id="summary-title">What it means for you</h2><p>The same numbers, with room to breathe.</p></div>
-        <p id="validation" class="validation"></p>
-        <div id="summary" class="summary"></div>
-        <!-- Task U: read-aloud controls belong in this audio section. -->
-        <div id="audio-section"></div>
-        <p class="advisor-note">A starting point for a conversation with your advisor. A person reviews and decides what happens next.</p>
-      </section>
-    </div>
-    <footer>Clear Statement · Synthetic sample, not a real statement.<br>Tested on sample data.</footer>
-  </main>
-</body>
-</html>
+<main id="main">
+<section id="home-view" class="home-view" aria-labelledby="home-title">
+<div class="home-intro"><div class="hero-visual" aria-hidden="true"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#document"></use></svg><span class="hero-seal"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#check"></use></svg></span></div><p class="hero-eyebrow">Clear words. Confident conversations.</p><h1 id="home-title" tabindex="-1">Your statement, made clearer.</h1><p>Read your statement in plain words, listen aloud, and bring your questions to your advisor.</p></div>
+<section class="home-card" aria-labelledby="upload-title"><h2 id="upload-title" class="icon-heading"><span class="icon-badge"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#upload"></use></svg></span>1. Choose a sample statement</h2><p>Synthetic demo · Tested on sample data. Please use a sample PDF only.</p>
+<div class="upload-actions"><button type="button" id="sample">Load sample</button><label class="upload-label" for="upload">Upload sample PDF</label><input id="upload" type="file" accept=".pdf,application/pdf" aria-describedby="upload-help"></div><p id="upload-help">Download the synthetic sample below, then select it with Upload sample PDF.</p><div class="sample-download"><span class="icon-badge amber-badge"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#document"></use></svg></span><div><strong>Ready-to-upload sample statement</strong><p>Margaret Hale · 2026-Q3 · Includes all three sample flags.</p><a class="nav-link" href="pdfs/problem.pdf" download="problem.pdf"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#document"></use></svg>Download sample PDF</a></div></div></section>
+<section class="home-card" aria-labelledby="demo-title"><h2 id="demo-title" class="icon-heading"><span class="icon-badge"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#chat"></use></svg></span>Continue the demo</h2><p>Read the sample summary, then review the flagged items as Dana Ortiz (demo advisor).</p><div class="home-actions"><a class="nav-link" href="#summary">Read sample summary</a><a class="nav-link" href="advisor.html">Open advisor review</a></div></section>
+</section>
+<p id="status" role="status" aria-live="polite">Loading the sample statement…</p><p id="error" role="alert" hidden></p>
+<section id="summary-view" hidden aria-label="Statement summary">
+<div class="flow-bar"><div class="flow-actions"><a class="nav-link" href="#home">← Go back</a><button id="print" type="button" class="secondary"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#print"></use></svg>Print this page</button></div>
+<ol class="flow-steps" aria-label="Statement steps"><li><a href="#home">1. Upload</a></li><li><a id="summary-step" href="#summary">2. Read your summary</a></li><li><a id="questions-step" href="#questions">3. Questions for your advisor</a></li></ol></div>
+<div id="comparison" class="comparison" aria-busy="true" hidden>
+<section class="panel original" aria-labelledby="original-title"><div class="panel-heading"><h2 id="original-title" class="icon-heading"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#document"></use></svg>Your original statement</h2><p><span class="sample-chip">Sample data</span> · Rendered from statement data.</p><a href="pdfs/problem.pdf" download="problem.pdf">Download original sample PDF</a></div><div id="statement"></div></section>
+<section class="panel plain" aria-labelledby="summary-title"><div class="panel-heading"><h2 id="summary-title" class="icon-heading" tabindex="-1"><svg class="ui-icon" aria-hidden="true"><use href="icons.svg#chat"></use></svg>In plain words</h2><p>The same numbers, made easier to read.</p></div>
+<div id="audio-section"></div><p id="validation" class="validation"></p><div id="summary" class="summary"></div>
+<button id="explain-toggle" class="secondary" type="button" aria-expanded="false" aria-controls="explanation">Why am I seeing this?</button>
+<div id="explanation" class="explanation" hidden><h3>Why we highlight these items</h3><p>Clear Statement uses simple checks for a large wire to a new payee, repeated withdrawals, and a fee increase. These items are worth a conversation with your advisor. A person reviews and decides what happens next.</p></div>
+<div class="advisor-note"><p>A person at your firm reviews anything unusual. Nothing happens to your account automatically.</p></div></section></div>
+<div class="summary-footer flow-actions"><a class="nav-link" href="#home">← Go back</a><a class="nav-link" href="#questions">Show me questions to ask my advisor</a><a class="nav-link" href="advisor.html">Continue to advisor review →</a></div>
+</section></main>
+<footer class="page-footer"><div class="footer-inner"><div class="assurance"><p><strong>A person decides.</strong> This tool never acts on an account by itself.</p></div><p class="footer-label">Clear Statement · Synthetic sample, not a real statement. Tested on sample data.</p></div></footer>
+</body></html>

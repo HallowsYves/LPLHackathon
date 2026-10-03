@@ -3,6 +3,7 @@ import { processStatement, getStatement, getSummary } from './api.js';
 const byId = id => document.getElementById(id);
 const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 const controls = [byId('sample'), byId('upload')];
+let statementReady = false;
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -11,6 +12,12 @@ function element(tag, text, className) {
   return node;
 }
 
+function uiIcon(name) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'ui-icon'); svg.setAttribute('aria-hidden', 'true');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', `icons.svg#${name}`); svg.append(use); return svg;
+}
 function table(caption, headings, rows) {
   const result = element('table');
   result.append(element('caption', caption));
@@ -38,7 +45,20 @@ function table(caption, headings, rows) {
 
 function renderStatement(statement) {
   const content = document.createDocumentFragment();
-  content.append(element('h3', statement.client.name), element('p', `Statement period: ${statement.period}`, 'period'));
+  const heading = element('div', undefined, 'statement-heading');
+  heading.append(element('h3', statement.client.name), element('p', `Statement period: ${statement.period}`, 'period'));
+  content.append(heading);
+  const highlights = element('section', undefined, 'statement-highlights');
+  highlights.append(element('h3', 'Statement figures'));
+  const figures = element('dl');
+  for (const [label, value] of [
+    ['Total ending value', statement.accounts.reduce((sum, account) => sum + account.end_value, 0)],
+    ['Fees this period', statement.fees.reduce((sum, fee) => sum + fee.amount, 0)],
+    ['Prior period fees', statement.prior_fee_total],
+  ]) {
+    const row = element('div'); row.append(element('dt', label), element('dd', money(value))); figures.append(row);
+  }
+  highlights.append(figures); content.append(highlights);
   content.append(table('Account values', ['Account', 'Start', 'End'], statement.accounts.map(account => [
     `${account.type} (${account.id})`, money(account.start_value), money(account.end_value),
   ])));
@@ -53,7 +73,26 @@ function renderStatement(statement) {
 }
 
 function renderSummary(summary) {
-  byId('summary').replaceChildren(...summary.text.split(/\n\s*\n/).map(text => element('p', text)));
+  byId('summary').replaceChildren(...summary.text.split(/\n\s*\n/).map(text => {
+    if (/^Questions to ask/i.test(text.trim())) {
+      const questions = element('section', undefined, 'questions');
+      questions.id = 'questions'; questions.tabIndex = -1;
+      const lines = text.trim().split('\n');
+      const heading = element('h3'); heading.append(uiIcon('questions'), document.createTextNode(lines[0]));
+      const list = element('ol');
+      lines.slice(1).filter(line => line.trim()).forEach(line => list.append(element('li', line.replace(/^\d+\.\s*/, ''))));
+      questions.append(heading, list); return questions;
+    }
+    const paragraph = element('p');
+    const body = element('span', undefined, 'summary-body');
+    text.split(/(\$[\d,]+(?:\.\d{2})?)/).forEach(part => body.append(part.startsWith('$') ? element('strong', part) : document.createTextNode(part)));
+    if (text.includes('$')) {
+      paragraph.className = 'summary-card';
+      const badge = element('span', undefined, 'icon-badge');
+      badge.append(uiIcon(/fees/i.test(text) ? 'receipt' : 'bank')); paragraph.append(badge);
+    }
+    paragraph.append(body); return paragraph;
+  }));
   const validation = summary.validation;
   byId('validation').textContent = `Numbers checked: ${validation.figures_checked}, mismatches: ${validation.mismatches.length}`;
   byId('validation').classList.toggle('needs-review', validation.mismatches.length > 0);
@@ -64,6 +103,7 @@ function renderSummary(summary) {
 
 async function load(input, process = true) {
   controls.forEach(control => { control.disabled = true; });
+  statementReady = false;
   byId('comparison').hidden = true;
   byId('comparison').setAttribute('aria-busy', 'true');
   byId('error').hidden = true;
@@ -73,7 +113,9 @@ async function load(input, process = true) {
     const [statement, summary] = await Promise.all([getStatement(id), getSummary(id)]);
     renderStatement(statement);
     renderSummary(summary);
-    byId('comparison').hidden = false;
+    statementReady = true;
+    if (process) location.hash = 'summary';
+    showRoute(location.hash === '#questions');
     byId('status').textContent = `Ready: ${statement.client.name} · ${statement.period} · Tested on sample data.`;
   } catch (error) {
     byId('status').textContent = 'Statement could not be loaded.';
@@ -94,6 +136,7 @@ byId('upload').addEventListener('change', event => {
 byId('contrast').addEventListener('click', () => {
   const enabled = document.body.classList.toggle('high-contrast');
   byId('contrast').setAttribute('aria-pressed', String(enabled));
+  byId('contrast').textContent = enabled ? '◐ High contrast: On' : '◐ High contrast: Off';
 });
 
 // Audio section — Task U. All audio UI and integration stay in this section.
@@ -121,8 +164,9 @@ let audioTimer;
 function setAudioState(state, message) {
   audioState = state;
   readAloud.disabled = state === 'unavailable' || state === 'loading';
-  readAloud.textContent = ({ playing: 'Pause reading', paused: 'Resume reading',
+  const audioLabel = ({ playing: 'Pause reading', paused: 'Resume reading',
     loading: 'Loading audio…', error: 'Retry read aloud' })[state] || 'Read aloud';
+  readAloud.replaceChildren(uiIcon('volume'), document.createTextNode(audioLabel));
   readAloud.setAttribute('aria-pressed', String(state === 'playing'));
   readAloud.setAttribute('aria-busy', String(state === 'loading'));
   audioStatus.textContent = message;
@@ -215,6 +259,49 @@ new MutationObserver(() => {
   if (byId('comparison').getAttribute('aria-busy') === 'true') resetAudio();
 }).observe(byId('comparison'), { attributes: true, attributeFilter: ['aria-busy'] });
 setAudioState('unavailable', audioStatus.textContent);
+
+// Connected upload → summary → questions flow; browser Back follows the same routes.
+function showRoute(focus = true) {
+  const route = location.hash.slice(1);
+  const showSummary = route === 'summary' || route === 'questions';
+  byId('home-view').hidden = showSummary;
+  byId('summary-view').hidden = !showSummary;
+  byId('comparison').hidden = !showSummary || !statementReady;
+  for (const [id, active] of [['summary-step', route === 'summary'], ['questions-step', route === 'questions']]) {
+    if (active) byId(id).setAttribute('aria-current', 'step');
+    else byId(id).removeAttribute('aria-current');
+  }
+  if (!showSummary && summaryAudio) {
+    summaryAudio.pause();
+    summaryAudio.currentTime = 0;
+    if (audioState !== 'error') setAudioState('ready', 'Select Read aloud to hear your summary.');
+  }
+  if (focus) {
+    const target = byId(showSummary ? (route === 'questions' ? 'questions' : 'summary-title') : 'home-title');
+    if (target) { target.focus(); target.scrollIntoView({ block: 'start' }); }
+  }
+}
+window.addEventListener('hashchange', () => showRoute());
+window.addEventListener('pagehide', () => summaryAudio?.pause());
+document.querySelector('.skip-link').addEventListener('click', event => {
+  event.preventDefault();
+  byId('main').tabIndex = -1;
+  byId('main').focus();
+  byId('main').scrollIntoView();
+});
+byId('print').addEventListener('click', () => window.print());
+byId('explain-toggle').addEventListener('click', () => {
+  const open = byId('explanation').hidden;
+  byId('explanation').hidden = !open;
+  byId('explain-toggle').setAttribute('aria-expanded', String(open));
+});
+let textSizeIndex = 0;
+byId('text-size').addEventListener('click', () => {
+  textSizeIndex = (textSizeIndex + 1) % 3;
+  document.body.style.setProperty('--body-size', `${[22, 24, 26][textSizeIndex]}px`);
+  byId('text-size').textContent = `Aa Text size: ${['A', 'A+', 'A++'][textSizeIndex]}`;
+});
+showRoute(false);
 
 // Reading on initial load preserves any decisions already made in this tab.
 load(null, false);
