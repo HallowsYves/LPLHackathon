@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clear Statement — mock API checks</title>
+<style>
+  body { font: 20px/1.5 system-ui; max-width: 900px; margin: 2rem auto; padding: 1rem; color: #122333; background: #fff; }
+  button { font: inherit; padding: .6rem 1rem; cursor: pointer; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+</style>
+<h1>Mock API checks</h1>
+<p>Synthetic demo — tested on sample data. Running checks resets this tab's mock decisions.</p>
+<button id="run">Run checks</button>
+<pre id="results" role="status" aria-live="polite">Ready.</pre>
+<audio id="audio" controls aria-label="Read the sample summary aloud"></audio>
+<script src="../config.js"></script>
+<script>
+  window.addEventListener('error', event => {
+    document.querySelector('#results').textContent = `FAIL ${event.message}`;
+  });
+</script>
+<script type="module">
+  import * as api from '../api.js';
+  window.api = api; // Console: await api.getStatement('problem')
+  const output = document.querySelector('#results');
+  const button = document.querySelector('#run');
+  output.textContent = 'API module loaded. Ready.';
+  function check(condition, message) {
+    if (!condition) throw new Error(message);
+    output.textContent += `PASS ${message}\n`;
+  }
+  async function rejects(fn, status) {
+    try { await fn(); } catch (error) { return error.status === status; }
+    return false;
+  }
+  button.onclick = async () => {
+    button.disabled = true;
+    output.textContent = '';
+    try {
+      if (!USE_MOCK) throw new Error('Set USE_MOCK = true before running mock checks.');
+      sessionStorage.removeItem('clear-statement.mock.v1');
+      // Fresh module state for repeatable checks in this tab.
+      const test = await import(`../api.js?check=${Date.now()}`);
+      window.api = test;
+      check((await test.processStatement('problem.pdf')).flags_created === 3, 'POST /process');
+      const statement = await test.getStatement('problem');
+      check(statement.client.name === 'Margaret Hale', 'GET /statement/problem');
+      const summary = await test.getSummary('problem');
+      check(summary.validation.mismatches.length === 0 && summary.validation.figures_checked === 11, 'GET /summary/problem');
+      document.querySelector('#audio').src = summary.audio_url;
+      const audioResponse = await fetch(summary.audio_url, { cache: 'no-store' });
+      const audioBytes = await audioResponse.arrayBuffer();
+      check(audioResponse.ok && new TextDecoder().decode(audioBytes.slice(0, 4)) === 'RIFF' && audioBytes.byteLength > 10000, 'Playable WAV asset');
+      check((await test.getFlags('problem')).length === 3, 'GET /flags');
+      check(await rejects(() => test.decideFlag('f1', 'escalate', '  '), 400), 'Escalation requires a note');
+      const record = await test.decideFlag('f1', 'escalate', 'Call Margaret to confirm the wire.');
+      check(record.action === 'escalate' && record.advisor === 'Dana Ortiz (demo advisor)', 'POST /flags/f1/decision');
+      check((await test.getFlags())[0].status === 'escalated', 'Decision updates flag status');
+      check((await test.getAudit('problem')).some(item => item.id === record.id), 'GET /audit/problem');
+      check(await rejects(() => test.decideFlag('f1', 'dismiss'), 409), 'Duplicate decision rejected');
+      await test.decideFlag('f2', 'approve');
+      await test.decideFlag('f3', 'dismiss');
+      check((await test.getFlags()).map(flag => flag.status).join(',') === 'escalated,approved,dismissed', 'All three decision actions');
+      const fresh = await import(`../api.js?reload=${Date.now()}`);
+      check((await fresh.getAudit('problem')).length === 3, 'Audit survives module reload');
+      check(await rejects(() => test.processStatement('unknown.pdf'), 400), 'Unknown upload rejected');
+      check(await rejects(() => test.getStatement('unknown'), 404), 'Unknown statement rejected');
+      check(await rejects(() => test.decideFlag('missing', 'approve'), 404), 'Unknown flag rejected');
+      check(await rejects(() => test.decideFlag('f1', 'hold'), 400), 'Unsupported action rejected');
+      await test.processStatement(new File(['synthetic'], 'problem.pdf', { type: 'application/pdf' }));
+      check((await test.getFlags()).every(flag => flag.status === 'open') && (await test.getAudit('problem')).length === 3, 'File upload reopens flags and retains audit');
+      output.textContent += '\nAll checks passed — tested on sample data.\nConsole API is available as window.api.';
+    } catch (error) { output.textContent += `FAIL ${error.message}`; }
+    finally { button.disabled = false; }
+  };
+</script>
+</html>
