@@ -76,7 +76,7 @@ function renderStatement(statement) {
 
 function renderSummary(summary) {
   byId('summary').replaceChildren(...summary.text.split(/\n\s*\n/).map(text => {
-    if (/^Questions to ask/i.test(text.trim())) {
+    if (/^Questions to ask|^Preguntas para/i.test(text.trim())) {
       const questions = element('section', undefined, 'questions');
       questions.id = 'questions'; questions.tabIndex = -1;
       const lines = text.trim().split('\n');

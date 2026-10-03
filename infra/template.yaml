@@ -153,6 +153,9 @@ Resources:
               Action: polly:SynthesizeSpeech
               Resource: '*'
             - Effect: Allow
+              Action: translate:TranslateText
+              Resource: '*'
+            - Effect: Allow
               Action: textract:AnalyzeDocument
               Resource: '*'
       Events:
