@@ -96,7 +96,125 @@ byId('contrast').addEventListener('click', () => {
   byId('contrast').setAttribute('aria-pressed', String(enabled));
 });
 
-// Audio section — reserved for Task U.
+// Audio section — Task U. All audio UI and integration stay in this section.
+const audioSection = byId('audio-section');
+const readAloud = element('button', 'Read aloud');
+readAloud.id = 'read-aloud';
+readAloud.type = 'button';
+readAloud.style.width = '100%';
+readAloud.style.minHeight = '56px';
+readAloud.setAttribute('aria-pressed', 'false');
+readAloud.setAttribute('aria-describedby', 'audio-status audio-error');
+const audioStatus = element('p', 'Audio will be available after the summary loads.');
+audioStatus.id = 'audio-status';
+audioStatus.setAttribute('role', 'status');
+const audioError = element('p');
+audioError.id = 'audio-error';
+audioError.setAttribute('role', 'alert');
+audioError.hidden = true;
+audioSection.append(readAloud, audioStatus, audioError);
+
+let summaryAudio = null;
+let audioState = 'unavailable';
+let audioTimer;
+
+function setAudioState(state, message) {
+  audioState = state;
+  readAloud.disabled = state === 'unavailable' || state === 'loading';
+  readAloud.textContent = ({ playing: 'Pause reading', paused: 'Resume reading',
+    loading: 'Loading audio…', error: 'Retry read aloud' })[state] || 'Read aloud';
+  readAloud.setAttribute('aria-pressed', String(state === 'playing'));
+  readAloud.setAttribute('aria-busy', String(state === 'loading'));
+  audioStatus.textContent = message;
+  if (state !== 'loading') clearTimeout(audioTimer);
+}
+
+function resetAudio() {
+  const previous = summaryAudio;
+  summaryAudio = null; // Ignore late events and play promises from the old source.
+  if (previous) {
+    previous.pause();
+    previous.removeAttribute('src');
+    previous.load();
+  }
+  audioError.hidden = true;
+  audioError.textContent = '';
+  setAudioState('unavailable', 'Audio will be available after the summary loads.');
+}
+
+function configureAudio(summary) {
+  resetAudio();
+  if (summary.validation?.mismatches?.length) {
+    setAudioState('unavailable', 'Read aloud is unavailable until the summary numbers are checked.');
+    return;
+  }
+  if (typeof summary.audio_url !== 'string' || !summary.audio_url.trim()) {
+    setAudioState('unavailable', 'No audio is available for this summary.');
+    return;
+  }
+  const audio = document.createElement('audio');
+  audio.preload = 'none';
+  audio.src = summary.audio_url;
+  summaryAudio = audio;
+  const current = () => summaryAudio === audio;
+  const fail = () => {
+    if (!current() || audioState === 'error') return;
+    setAudioState('error', 'Reading stopped.');
+    audio.pause();
+    audioError.textContent = 'We could not load or play the audio. Try Retry read aloud. If it still fails, use Load sample to refresh the audio link.';
+    audioError.hidden = false;
+  };
+  audio.addEventListener('error', fail);
+  audio.addEventListener('playing', () => {
+    if (!current()) return;
+    if (audioState === 'error') { audio.pause(); return; }
+    setAudioState('playing', 'Reading your summary aloud.');
+  });
+  audio.addEventListener('pause', () => {
+    if (current() && audioState === 'playing' && !audio.ended) setAudioState('paused', 'Reading paused. Select Resume reading to continue.');
+  });
+  audio.addEventListener('ended', () => {
+    if (current()) setAudioState('ready', 'Reading finished. Select Read aloud to listen again.');
+  });
+  for (const event of ['waiting', 'stalled']) {
+    audio.addEventListener(event, () => {
+      if (current() && audioState === 'playing') {
+        setAudioState('loading', 'Audio is buffering…');
+        audioTimer = setTimeout(fail, 20000);
+      }
+    });
+  }
+  readAloud.onclick = async () => {
+    if (!current()) return;
+    if (audioState === 'playing') {
+      audio.pause();
+      return;
+    }
+    audioError.hidden = true;
+    audioError.textContent = '';
+    if (audioState === 'error') audio.load();
+    if (audio.ended) audio.currentTime = 0;
+    setAudioState('loading', 'Loading audio…');
+    audioTimer = setTimeout(fail, 20000);
+    try {
+      await audio.play(); // Native button click supports Enter and Space, preserving user activation.
+    } catch {
+      fail();
+    }
+  };
+  setAudioState('ready', 'Select Read aloud to hear your summary.');
+}
+
+// Hook Task T without changing its statement/summary rendering section.
+const renderSummaryBeforeAudio = renderSummary;
+renderSummary = summary => {
+  renderSummaryBeforeAudio(summary);
+  configureAudio(summary);
+};
+new MutationObserver(() => {
+  if (byId('comparison').getAttribute('aria-busy') === 'true') resetAudio();
+}).observe(byId('comparison'), { attributes: true, attributeFilter: ['aria-busy'] });
+setAudioState('unavailable', audioStatus.textContent);
 
 // Reading on initial load preserves any decisions already made in this tab.
 load(null, false);
