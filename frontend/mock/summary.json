@@ -1,0 +1,11 @@
+{
+  "statement_id": "problem",
+  "text": "Synthetic sample statement. Tested on sample data.\n\nHere is your statement summary for 2026-Q3, Margaret.\n\nYour accounts together are worth $490,517.57. At the start of the period they were worth $538,750.37.\nYour IRA ended at $417,163.54, up $4,863.42.\nYour Individual brokerage ended at $73,354.03, down $53,096.22.\n\nMoney sent out this period: 7 payments totaling $55,950.\nThe largest was $48,000 on 2026-09-12 to Greenfield Holdings LLC.\n\nFees paid this period: $1,031.50. Last period they were $640.\n\nQuestions to ask your advisor:\n1. Can you explain the $48,000 payment on 2026-09-12?\n2. What does each fee on this statement cover?\n3. Is there anything on this statement you would like to go over with me?",
+  "validation": {
+    "figures_checked": 11,
+    "mismatches": [],
+    "attempts": 0,
+    "used_fallback": true
+  },
+  "audio_url": "summary.wav"
+}

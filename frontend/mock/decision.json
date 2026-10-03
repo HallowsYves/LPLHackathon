@@ -1,0 +1,9 @@
+{
+  "id": "a1",
+  "statement_id": "problem",
+  "flag_id": "f1",
+  "advisor": "Dana Ortiz (demo advisor)",
+  "action": "escalate",
+  "note": "Call Margaret to confirm the wire. Tested on sample data.",
+  "timestamp": "2026-10-03T01:14:00Z"
+}
